@@ -498,9 +498,7 @@ public class VariantLockAction extends VariantPage {
      * @return Number of product cards found
      */
     public int getProductCount() {
-        ThreadWait();
         awaitTillElementDisplayed(findFirst(".product-card"));
-        ThreadWait();
         return productCards.size();
     }
 
@@ -509,9 +507,7 @@ public class VariantLockAction extends VariantPage {
      * @return First product card element
      */
     public FluentWebElement getFirstProduct() {
-        ThreadWait();
         awaitTillElementDisplayed(findFirst(".product-card"));
-        ThreadWait();
         Assert.assertTrue(productCards.size() > 0, "No products found in preview");
         return productCards.get(0);
     }
@@ -522,9 +518,7 @@ public class VariantLockAction extends VariantPage {
      * @return Product card element at the specified index
      */
     public FluentWebElement getProductByIndex(int index) {
-        ThreadWait();
         awaitTillElementDisplayed(findFirst(".product-card"));
-        ThreadWait();
         Assert.assertTrue(productCards.size() > index, "Product index out of bounds. Total products: " + productCards.size());
         return productCards.get(index);
     }

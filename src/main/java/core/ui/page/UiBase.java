@@ -956,6 +956,9 @@ public class UiBase extends PageBase {
         return findFirst("body").getAttribute("class").contains("modal-open");
     }
 
+    /** CSS selector for the facet edit info wrapper (e.g. "We have currently queued editing the display name of a facet field..."). */
+    private static final String FACET_EDIT_INFO_WRAPPER_CSS = "div.fn-edit-info-wrapper";
+
     /**
      * Wait for an element to disappear from the page
      * @param element The element to wait for its disappearance
@@ -963,27 +966,30 @@ public class UiBase extends PageBase {
     public void waitForElementToDisappear(FluentWebElement element) throws InterruptedException {
         try {
             System.out.println("Waiting for element to disappear");
-            WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(WAIT_ELEMENT_DISAPPEAR_SECONDS));
-            
-            // Use the getCssLocatorForFluent method to get a reliable CSS selector
             String cssSelector = getCssLocatorForFluent(element);
-            
-            // Wait for the element to become invisible
-            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(cssSelector)));
-            
-            ThreadWait(); // Additional small wait to ensure UI has updated
-            System.out.println("Element disappeared successfully");
+            waitForElementToDisappear(cssSelector);
         } catch (Exception e) {
             System.err.println("Error waiting for element to disappear: " + e.getMessage());
-           ThreadWait();
         }
     }
 
     /**
-     * Safely clicks on an element by ensuring it is visible in the viewport,
-     * waiting for it to be clickable, and falling back to a JavaScript click
-     * if a standard click is intercepted.
+     * Wait for an element to disappear from the page by CSS selector.
+     * @param cssSelector CSS selector of the element to wait for its disappearance (e.g. "div.fn-edit-info-wrapper")
      */
+    public void waitForElementToDisappear(String cssSelector) throws InterruptedException {
+        try {
+            System.out.println("Waiting for element to disappear: " + cssSelector);
+            WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(WAIT_ELEMENT_DISAPPEAR_SECONDS));
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(cssSelector)));
+            ThreadWait(); // Additional small wait to ensure UI has updated
+            System.out.println("Element disappeared successfully");
+        } catch (Exception e) {
+            System.err.println("Error waiting for element to disappear: " + e.getMessage());
+        }
+    }
+
+  
     public void safeClick(FluentWebElement element) {
         try {
             // Ensure present and visible

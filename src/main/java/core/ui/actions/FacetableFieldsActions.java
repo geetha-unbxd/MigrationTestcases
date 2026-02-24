@@ -157,7 +157,6 @@ public class FacetableFieldsActions extends FacetableFieldsPage {
         awaitForElementPresence(facetAttributeDropDown);
         ThreadWait();
         click(facetAttributeDropDown);
-        Thread.sleep(1500);
         ThreadWait();
         attributeInputBox.fill().with(facetAttribute);
         ThreadWait();
@@ -333,12 +332,10 @@ public class FacetableFieldsActions extends FacetableFieldsPage {
 
     public FluentWebElement getFacetUsingFieldName(String name)
     {
-        awaitForElementPresence(facetSearchBox);
-        ThreadWait();
+        awaitForElementPresence(searchIcon);
         searchIcon.click();
         facetSearchBox.click();
         facetSearchBox.clear();
-        ThreadWait();
         facetSearchBox.fill().with(name);
         ThreadWait();
         for(int i=0 ; i<facetList.size() ; i++)
