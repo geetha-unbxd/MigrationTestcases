@@ -1,13 +1,13 @@
 {
   "testData": [
     {
-      "facetDisplayName": "auto1",
+      "facetDisplayName": "createFacetTest",
       "facetName": "Upholstery_Type",
       "facetLength": "12",
       "sortOrder": "Alphabetical (A-Z)",
       "facetDisplayValue" : "Disabled",
 
-      "updateDisplayName": "auto2",
+      "updateDisplayName": "createFacetTestUpdated",
       "updateSortOrder": "Product Count"
     }
     /*,

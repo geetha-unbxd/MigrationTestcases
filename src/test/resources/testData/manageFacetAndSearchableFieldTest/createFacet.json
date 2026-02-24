@@ -1,13 +1,13 @@
 {
   "testData": [
     {
-      "facetDisplayName": "auto1",
+      "facetDisplayName": "createFacet",
       "facetName": "store_codes",
       "facetLength": "12",
       "sortOrder": "Alphabetical (A-Z)",
       "facetDisplayValue" : "Disabled",
 
-      "updateDisplayName": "auto2",
+      "updateDisplayName": "createFacetUpdated",
       "updateSortOrder": "Product Count"
     }
     /*,
