@@ -1,0 +1,65 @@
+package core.consoleui.actions;
+
+import core.consoleui.page.PhrasesPage;
+import core.ui.page.UiBase;
+import lib.compat.FluentWebElement;
+import org.testng.Assert;
+import java.util.List;
+import lib.compat.Page;
+import core.consoleui.actions.SynonymActions;
+
+
+public class PhrasesActions extends PhrasesPage {
+
+@Page SynonymActions synonymActions;
+
+        
+        public String createPhrase(String synonym, String uni, String bi) throws InterruptedException
+            {
+    String phraseName = "auto phrases" + System.currentTimeMillis();
+    awaitForElementPresence(synonymActions.synonymCreationButton);
+    click(synonymActions.synonymCreationButton);
+    Assert.assertTrue(awaitForElementPresence(synonymActions.synonymCreateWindow));
+
+    synonymActions.synonymInput.fill().with(synonym);
+    awaitForElementPresence(synonymActions.createSynonymButton);
+
+    if(uni!=null && uni!="") {
+        synonymActions.unidirections.click();
+        synonymActions.unidirectionalInput.fill().with(uni);
+    }
+
+    if(bi!=null && bi!=""){
+        synonymActions.bidirections.click();
+        synonymActions.bidirectionalInput.fill().with(bi);
+    }
+
+    synonymActions.createSynonymButton.click();
+    Assert.assertTrue(checkSuccessMessage(),"Phrase was not created successfully");
+    awaitForElementNotDisplayed(synonymActions.synonymCreateWindow);
+    //Assert.assertTrue(checkSuccessMessage(), UnbxdErrorConstants.SUCCESS_MESSAGE_FAILURE);
+    return synonym;
+}
+       
+        
+    
+
+    public FluentWebElement getPhraseByName(String name) throws InterruptedException {
+        ThreadWait();
+        List<FluentWebElement> phraseRows = find(".rdt_TableBody .rdt_TableRow");
+        for (FluentWebElement row : phraseRows) {
+            String rowText = row.getText();
+            if (rowText != null && rowText.contains(name)) {
+                return row;
+            }
+        }
+        return null;
+    }
+
+    public String createPhrase() throws InterruptedException {
+        String phraseName = "auto phrases" + System.currentTimeMillis();
+        return createPhrase(phraseName, null, null);
+    }
+
+    // You can add edit and delete methods here if needed, or use inherited ones if present
+} 

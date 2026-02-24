@@ -1,0 +1,207 @@
+package core.reporting;
+
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.Status;
+import lib.Helper;
+import lib.retry.RetryAnalyzer;
+import org.testng.ITestContext;
+import org.testng.ITestListener;
+import org.testng.ITestResult;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.io.FileUtils;
+
+public class ExtentTestNGITestListener implements ITestListener {
+
+    private static ExtentReports extent = ExtentManager.createInstance("extent.html");
+    private static ThreadLocal<ExtentTest> parentTest = new ThreadLocal<>();
+    private static ThreadLocal<ExtentTest> test = new ThreadLocal<>();
+    private static final Map<String, ExtentTest> parentByContextName = new ConcurrentHashMap<>();
+
+    ExtentTest parent, subChild;
+    ITestContext context;
+
+
+    @Override
+    public synchronized void onTestStart(ITestResult iTestResult) {
+
+
+    }
+
+    @Override
+    public synchronized void onTestSuccess(ITestResult iTestResult) {
+        try {
+            if (parentTest.get() != null) {
+                boolean flaky = RetryAnalyzer.wasRetried(iTestResult);
+                String label = flaky
+                    ? " Test " + iTestResult.getMethod().getMethodName() + " [FLAKY - passed on retry]"
+                    : " Test " + iTestResult.getMethod().getMethodName();
+                ExtentTest child = parentTest.get().createNode(label, iTestResult.getMethod().getDescription());
+                setTestTimes(child, iTestResult);
+                test.set(child);
+                if (flaky) {
+                    test.get().log(Status.INFO, "This test failed on earlier attempt(s) but passed on retry");
+                    test.get().assignCategory("Flaky");
+                }
+                appendTestInfoInReport(Status.PASS, iTestResult);
+            }
+        } catch (Exception e) {
+            System.err.println("Error in onTestSuccess: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public synchronized void onTestFailure(ITestResult iTestResult) {
+        try {
+            if (parentTest.get() != null) {
+                ExtentTest child = parentTest.get().createNode("Test :" + iTestResult.getMethod().getMethodName(), iTestResult.getMethod().getDescription());
+                setTestTimes(child, iTestResult);
+                test.set(child);
+                appendTestInfoInReport(Status.FAIL, iTestResult);
+            }
+        } catch (Exception e) {
+            System.err.println("Error in onTestFailure: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public synchronized void onTestSkipped(ITestResult iTestResult) {
+        try {
+            if (RetryAnalyzer.wasRetried(iTestResult)) {
+                return;
+            }
+            if (parentTest.get() != null) {
+                ExtentTest child = parentTest.get().createNode("Test :" + iTestResult.getMethod().getMethodName(), iTestResult.getMethod().getDescription());
+                setTestTimes(child, iTestResult);
+                test.set(child);
+                appendTestInfoInReport(Status.SKIP, iTestResult);
+            }
+        } catch (Exception e) {
+            System.err.println("Error in onTestSkipped: " + e.getMessage());
+        }
+    }
+
+    private static void setTestTimes(ExtentTest extentTest, ITestResult iTestResult) {
+        try {
+            long startMs = iTestResult.getStartMillis();
+            long endMs = iTestResult.getEndMillis();
+            if (extentTest.getModel() != null) {
+                if (startMs > 0) extentTest.getModel().setStartTime(new Date(startMs));
+                if (endMs > 0) extentTest.getModel().setEndTime(new Date(endMs));
+            }
+        } catch (Exception e) {
+            System.err.println("Could not set test times in report: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public   synchronized void onTestFailedButWithinSuccessPercentage(ITestResult iTestResult) {
+
+    }
+
+    @Override
+    public  synchronized void onStart(ITestContext iTestContext) {
+        this.context = iTestContext;
+        parent = extent.createTest(iTestContext.getName());
+        parentTest.set(parent);
+        parentByContextName.put(iTestContext.getName(), parent);
+    }
+
+    @Override
+    public synchronized void onFinish(ITestContext iTestContext) {
+        ExtentTest contextParent = parentByContextName.remove(iTestContext.getName());
+        if (contextParent != null) {
+            try {
+                if (contextParent.getModel() != null)
+                    contextParent.getModel().setEndTime(new Date());
+            } catch (Exception e) {
+                System.err.println("Could not set parent test end time: " + e.getMessage());
+            }
+        }
+
+        java.util.Set<String> flakyTests = RetryAnalyzer.getRetriedTests();
+        if (!flakyTests.isEmpty()) {
+            System.out.println("\n===== FLAKY TESTS (passed on retry) =====");
+            for (String testName : flakyTests) {
+                System.out.println("  - " + testName);
+            }
+            System.out.println("  Total flaky: " + flakyTests.size());
+            System.out.println("==========================================\n");
+        }
+
+        extent.flush();
+        try {
+            File reportDir = new File("Extent_Report");
+            if (!reportDir.exists()) {
+                reportDir.mkdirs();
+            }
+            File srcHtml = new File("extent.html");
+            if (srcHtml.exists()) {
+                File dstHtml = new File(reportDir, "index.html");
+                FileUtils.copyFile(srcHtml, dstHtml);
+            } else {
+                File alt = new File("test-output/ExtentReport.html");
+                if (alt.exists()) {
+                    File dstHtml = new File(reportDir, "index.html");
+                    FileUtils.copyFile(alt, dstHtml);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to finalize Extent report artifacts: " + e.getMessage());
+        }
+
+    }
+
+
+    private synchronized void appendTestInfoInReport(Status testStatus, ITestResult iTestResult) throws IOException
+    {
+        if (test.get() == null) {
+            System.err.println("ExtentTest is null, skipping report update");
+            return;
+        }
+        
+        if (testStatus.equals(Status.FAIL)) {
+            try {
+                String destinationPath = Helper.getScreenShot(iTestResult.getMethod().getMethodName());
+                if (destinationPath != null && new File(destinationPath).exists()) {
+                    File src = new File(destinationPath);
+                    File reportDir = new File("Extent_Report");
+                    if (!reportDir.exists()) {
+                        reportDir.mkdirs();
+                    }
+                    File screenshotsDir = new File(reportDir, "screenshots");
+                    if (!screenshotsDir.exists()) {
+                        screenshotsDir.mkdirs();
+                    }
+                    String fileName = src.getName();
+                    File dst = new File(screenshotsDir, fileName);
+                    try {
+                        FileUtils.copyFile(src, dst);
+                        String relativePath = "screenshots/" + fileName;
+                        test.get().addScreenCaptureFromPath(relativePath, "Failure Screenshot");
+                    } catch (IOException copyEx) {
+                        System.err.println("Failed to copy screenshot into report directory: " + copyEx.getMessage());
+                        test.get().addScreenCaptureFromPath(destinationPath, "Failure Screenshot");
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to capture screenshot: " + e.getMessage());
+            }
+            if (iTestResult.getThrowable() != null) {
+                test.get().log(testStatus, "Failure Reason : " + iTestResult.getThrowable().getMessage());
+            }
+        }
+        if (testStatus.equals(Status.SKIP)) {
+            if (iTestResult.getThrowable() != null) {
+                test.get().log(testStatus, "Skipped Reason: " + iTestResult.getThrowable().getMessage());
+            }
+        }
+    }
+
+}

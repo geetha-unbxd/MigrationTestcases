@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>selfServe-ui-tests</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <selenium.version>4.20.0</selenium.version>
+        <testng.version>7.8.0</testng.version>
+        <extentreports.version>3.1.2</extentreports.version>
+        <slf4j.version>2.0.9</slf4j.version>
+        <logback.version>1.4.11</logback.version>
+        <webdrivermanager.version>5.8.0</webdrivermanager.version>
+    </properties>
+
+    <dependencies>
+        <!-- Selenium 4 (unified) -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+
+        <!-- WebDriverManager: auto-downloads correct driver binaries -->
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>${webdrivermanager.version}</version>
+        </dependency>
+
+        <!-- TestNG 7.8 -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+        </dependency>
+
+        <!-- Logging: SLF4J + Logback (replaces log4j 1.x) -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <!-- Bridge log4j calls to SLF4J so existing log4j code still works -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <!-- ExtentReports 5.x -->
+        <dependency>
+            <groupId>com.aventstack</groupId>
+            <artifactId>extentreports</artifactId>
+            <version>${extentreports.version}</version>
+        </dependency>
+
+        <!-- Config -->
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <version>1.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>2.2</version>
+        </dependency>
+
+        <!-- REST -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>5.3.2</version>
+        </dependency>
+
+        <!-- Utilities -->
+        <dependency>
+            <groupId>com.github.javafaker</groupId>
+            <artifactId>javafaker</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.30</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.15.1</version>
+        </dependency>
+
+        <!-- Mail -->
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>javax.mail-api</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+
+        <!-- CSV -->
+        <dependency>
+            <groupId>au.com.bytecode</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>2.4</version>
+        </dependency>
+
+        <!-- Database -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+
+        <!-- Slack -->
+        <dependency>
+            <groupId>com.ullink.slack</groupId>
+            <artifactId>simpleslackapi</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+
+        <!-- CORBA -->
+        <dependency>
+            <groupId>org.glassfish.corba</groupId>
+            <artifactId>glassfish-corba-omgapi</artifactId>
+            <version>4.0.2-b009</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <excludes>
+                    <exclude>driver/**</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources/driver</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <properties>
+                        <property>
+                            <name>listener</name>
+                            <value>core.reporting.ExtentTestNGITestListener,core.AnnotationTransformer,core.reporting.FailedTestXmlListener</value>
+                        </property>
+                    </properties>
+                    <rerunFailingTestsCount>1</rerunFailingTestsCount>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
+                    </suiteXmlFiles>
+                    <systemPropertyVariables>
+                        <env.profile>${env.profile}</env.profile>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>Dev</id>
+            <properties>
+                <env.execType>local</env.execType>
+                <env.profile>Dev</env.profile>
+                <browser.dimension.x>1280</browser.dimension.x>
+                <browser.dimension.y>800</browser.dimension.y>
+                <driver.browser>chrome</driver.browser>
+                <env.platform>windows</env.platform>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>ProdGCP</id>
+            <properties>
+                <env.execType>local</env.execType>
+                <env.profile>ProdGCP</env.profile>
+                <browser.dimension.x>1280</browser.dimension.x>
+                <browser.dimension.y>800</browser.dimension.y>
+                <driver.browser>chrome</driver.browser>
+                <env.platform>windows</env.platform>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>ProdAPAC</id>
+            <properties>
+                <env.execType>local</env.execType>
+                <env.profile>ProdAPAC</env.profile>
+                <browser.dimension.x>1280</browser.dimension.x>
+                <browser.dimension.y>800</browser.dimension.y>
+                <driver.browser>chrome</driver.browser>
+                <env.platform>windows</env.platform>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>ProdUS</id>
+            <properties>
+                <env.execType>local</env.execType>
+                <env.profile>ProdUS</env.profile>
+                <browser.dimension.x>1280</browser.dimension.x>
+                <browser.dimension.y>800</browser.dimension.y>
+                <driver.browser>chrome</driver.browser>
+                <env.platform>windows</env.platform>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>ProdUK</id>
+            <properties>
+                <env.execType>local</env.execType>
+                <env.profile>ProdUK</env.profile>
+                <browser.dimension.x>1280</browser.dimension.x>
+                <browser.dimension.y>800</browser.dimension.y>
+                <driver.browser>chrome</driver.browser>
+                <env.platform>windows</env.platform>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>ProdANZ</id>
+            <properties>
+                <env.execType>local</env.execType>
+                <env.profile>ProdANZ</env.profile>
+                <browser.dimension.x>1280</browser.dimension.x>
+                <browser.dimension.y>800</browser.dimension.y>
+                <driver.browser>chrome</driver.browser>
+                <env.platform>windows</env.platform>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>ProdGANZ</id>
+            <properties>
+                <env.execType>local</env.execType>
+                <env.profile>ProdGANZ</env.profile>
+                <browser.dimension.x>1280</browser.dimension.x>
+                <browser.dimension.y>800</browser.dimension.y>
+                <driver.browser>chrome</driver.browser>
+                <env.platform>windows</env.platform>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>
