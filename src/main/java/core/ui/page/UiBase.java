@@ -722,7 +722,7 @@ public class UiBase extends PageBase {
 
     public static void ThreadWait() {
         try {
-            Thread.sleep(500);
+            Thread.sleep(600);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

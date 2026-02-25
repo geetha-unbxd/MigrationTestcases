@@ -1,7 +1,7 @@
 {
   "testData": [
     {
-      "facetDisplayName": "createFacet",
+      "facetDisplayName": "createfacet",
       "facetName": "store_codes",
       "facetLength": "12",
       "sortOrder": "Alphabetical (A-Z)",

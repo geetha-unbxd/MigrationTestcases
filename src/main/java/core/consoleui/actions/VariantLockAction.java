@@ -24,14 +24,14 @@ public class VariantLockAction extends VariantPage {
     public void scrollToBottomUntilVariantLockVisible() {
         org.openqa.selenium.JavascriptExecutor js = (org.openqa.selenium.JavascriptExecutor) getDriver();
         System.out.println("Starting to scroll until footer button area is visible...");
-        
+
         int maxScrollAttempts = 15;
         int scrollAttempt = 0;
         long lastHeight = 0;
-        
+
         // First, try to find the footer button element using CSS selector directly
         FluentWebElement footerElement = null;
-        
+
         while (scrollAttempt < maxScrollAttempts) {
             try {
                 // Try to find the footer button area using CSS selector - try multiple selectors
@@ -42,48 +42,48 @@ public class VariantLockAction extends VariantPage {
                 if (footerElement == null) {
                     footerElement = findFirst("button.unx-qa-apply-merchcondition");
                 }
-                
+
                 if (footerElement != null) {
                     try {
                         // Check if element is displayed
                         if (footerElement.isDisplayed()) {
                             // Check if it's in viewport
                             Boolean isInViewport = (Boolean) js.executeScript(
-                                "var rect = arguments[0].getBoundingClientRect();" +
-                                "var windowHeight = window.innerHeight || document.documentElement.clientHeight;" +
-                                "var windowWidth = window.innerWidth || document.documentElement.clientWidth;" +
-                                "return (rect.top >= 0 && rect.top < windowHeight && " +
-                                "rect.left >= 0 && rect.left < windowWidth && " +
-                                "rect.bottom > 0 && rect.right > 0);",
-                                footerElement.getElement()
+                                    "var rect = arguments[0].getBoundingClientRect();" +
+                                            "var windowHeight = window.innerHeight || document.documentElement.clientHeight;" +
+                                            "var windowWidth = window.innerWidth || document.documentElement.clientWidth;" +
+                                            "return (rect.top >= 0 && rect.top < windowHeight && " +
+                                            "rect.left >= 0 && rect.left < windowWidth && " +
+                                            "rect.bottom > 0 && rect.right > 0);",
+                                    footerElement.getElement()
                             );
-                            
+
                             if (isInViewport != null && isInViewport) {
                                 System.out.println("Footer button area is visible in viewport");
                                 return;
                             } else {
                                 // Element exists but not in viewport, scroll to it
                                 System.out.println("Footer button found but not in viewport, scrolling to it...");
-                                js.executeScript("arguments[0].scrollIntoView({block: 'center', behavior: 'auto'});", 
-                                                footerElement.getElement());
+                                js.executeScript("arguments[0].scrollIntoView({block: 'center', behavior: 'auto'});",
+                                        footerElement.getElement());
                                 ThreadWait();
                                 try {
                                     Thread.sleep(800);
                                 } catch (InterruptedException e) {
                                     Thread.currentThread().interrupt();
                                 }
-                                
+
                                 // Check again if it's now in viewport
                                 isInViewport = (Boolean) js.executeScript(
-                                    "var rect = arguments[0].getBoundingClientRect();" +
-                                    "var windowHeight = window.innerHeight || document.documentElement.clientHeight;" +
-                                    "var windowWidth = window.innerWidth || document.documentElement.clientWidth;" +
-                                    "return (rect.top >= 0 && rect.top < windowHeight && " +
-                                    "rect.left >= 0 && rect.left < windowWidth && " +
-                                    "rect.bottom > 0 && rect.right > 0);",
-                                    footerElement.getElement()
+                                        "var rect = arguments[0].getBoundingClientRect();" +
+                                                "var windowHeight = window.innerHeight || document.documentElement.clientHeight;" +
+                                                "var windowWidth = window.innerWidth || document.documentElement.clientWidth;" +
+                                                "return (rect.top >= 0 && rect.top < windowHeight && " +
+                                                "rect.left >= 0 && rect.left < windowWidth && " +
+                                                "rect.bottom > 0 && rect.right > 0);",
+                                        footerElement.getElement()
                                 );
-                                
+
                                 if (isInViewport != null && isInViewport) {
                                     System.out.println("Footer button area is now visible after scrolling");
                                     return;
@@ -98,26 +98,26 @@ public class VariantLockAction extends VariantPage {
                 // Element not found yet, continue scrolling
                 System.out.println("Footer button area not found yet, attempt " + (scrollAttempt + 1));
             }
-            
+
             // Scroll to bottom
             try {
                 // Scroll down
                 js.executeScript("window.scrollTo(0, Math.max(document.body.scrollHeight, document.documentElement.scrollHeight));");
                 ThreadWait();
-                
+
                 // Also try scrolling the document element
                 js.executeScript("document.documentElement.scrollTop = document.documentElement.scrollHeight;");
                 ThreadWait();
-                
+
                 try {
                     Thread.sleep(800);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
-                
+
                 // Check if page height changed (lazy loading)
                 long newHeight = ((Number) js.executeScript("return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);")).longValue();
-                
+
                 if (newHeight == lastHeight && lastHeight > 0) {
                     // Page height didn't change, we might have reached the bottom
                     // Try one more time to find and scroll to the element
@@ -130,8 +130,8 @@ public class VariantLockAction extends VariantPage {
                             footerElement = findFirst("button.unx-qa-apply-merchcondition");
                         }
                         if (footerElement != null && footerElement.isDisplayed()) {
-                            js.executeScript("arguments[0].scrollIntoView({block: 'center', behavior: 'auto'});", 
-                                            footerElement.getElement());
+                            js.executeScript("arguments[0].scrollIntoView({block: 'center', behavior: 'auto'});",
+                                    footerElement.getElement());
                             ThreadWait();
                             try {
                                 Thread.sleep(1000);
@@ -145,15 +145,15 @@ public class VariantLockAction extends VariantPage {
                         // Continue
                     }
                 }
-                
+
                 lastHeight = newHeight;
             } catch (Exception e) {
                 System.out.println("Error during scrolling: " + e.getMessage());
             }
-            
+
             scrollAttempt++;
         }
-        
+
         // Final attempt: try to find and scroll to the footer button
         System.out.println("Final attempt: waiting for footer button area...");
         try {
@@ -165,7 +165,7 @@ public class VariantLockAction extends VariantPage {
             if (footerElement == null) {
                 footerElement = findFirst("button.unx-qa-apply-merchcondition");
             }
-            
+
             if (footerElement != null) {
                 awaitTillElementDisplayed(footerElement);
                 scrollUntilVisible(footerElement);
@@ -185,8 +185,8 @@ public class VariantLockAction extends VariantPage {
                     footerElement = findFirst("button.unx-qa-apply-merchcondition");
                 }
                 if (footerElement != null) {
-                    js.executeScript("arguments[0].scrollIntoView({block: 'center', behavior: 'auto'});", 
-                                    footerElement.getElement());
+                    js.executeScript("arguments[0].scrollIntoView({block: 'center', behavior: 'auto'});",
+                            footerElement.getElement());
                     ThreadWait();
                 }
             } catch (Exception ex) {
@@ -208,35 +208,35 @@ public class VariantLockAction extends VariantPage {
     public void scrollUntilPinningDropdownVisible() {
         org.openqa.selenium.JavascriptExecutor js = (org.openqa.selenium.JavascriptExecutor) getDriver();
         System.out.println("Starting to scroll until pinning dropdown is visible...");
-        
+
         // First, scroll to bottom to ensure content is loaded
         scrollToBottom();
         ThreadWait();
-        
+
         int maxAttempts = 15;
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
             try {
                 // Use JavaScript to find and scroll to the element directly by CSS selector
                 Object element = js.executeScript(
-                    "var element = document.querySelector('.pin-sel-summary');" +
-                    "if (element) {" +
-                    "  var rect = element.getBoundingClientRect();" +
-                    "  var windowHeight = window.innerHeight || document.documentElement.clientHeight;" +
-                    "  var isVisible = (rect.top >= 0 && rect.top < windowHeight && " +
-                    "                  rect.left >= 0 && rect.left < window.innerWidth && " +
-                    "                  rect.bottom > 0 && rect.right > 0);" +
-                    "  if (!isVisible) {" +
-                    "    element.scrollIntoView({block: 'center', behavior: 'auto'});" +
-                    "    return 'scrolled';" +
-                    "  } else {" +
-                    "    return 'visible';" +
-                    "  }" +
-                    "}" +
-                    "return 'notFound';"
+                        "var element = document.querySelector('.pin-sel-summary');" +
+                                "if (element) {" +
+                                "  var rect = element.getBoundingClientRect();" +
+                                "  var windowHeight = window.innerHeight || document.documentElement.clientHeight;" +
+                                "  var isVisible = (rect.top >= 0 && rect.top < windowHeight && " +
+                                "                  rect.left >= 0 && rect.left < window.innerWidth && " +
+                                "                  rect.bottom > 0 && rect.right > 0);" +
+                                "  if (!isVisible) {" +
+                                "    element.scrollIntoView({block: 'center', behavior: 'auto'});" +
+                                "    return 'scrolled';" +
+                                "  } else {" +
+                                "    return 'visible';" +
+                                "  }" +
+                                "}" +
+                                "return 'notFound';"
                 );
-                
+
                 String result = element != null ? element.toString() : "notFound";
-                
+
                 if ("visible".equals(result)) {
                     System.out.println("Pinning dropdown is visible in viewport");
                     ThreadWait();
@@ -251,15 +251,15 @@ public class VariantLockAction extends VariantPage {
                     }
                     // Check again if it's now visible
                     Object checkResult = js.executeScript(
-                        "var element = document.querySelector('.pin-sel-summary');" +
-                        "if (element) {" +
-                        "  var rect = element.getBoundingClientRect();" +
-                        "  var windowHeight = window.innerHeight || document.documentElement.clientHeight;" +
-                        "  return (rect.top >= 0 && rect.top < windowHeight && " +
-                        "          rect.left >= 0 && rect.left < window.innerWidth && " +
-                        "          rect.bottom > 0 && rect.right > 0);" +
-                        "}" +
-                        "return false;"
+                            "var element = document.querySelector('.pin-sel-summary');" +
+                                    "if (element) {" +
+                                    "  var rect = element.getBoundingClientRect();" +
+                                    "  var windowHeight = window.innerHeight || document.documentElement.clientHeight;" +
+                                    "  return (rect.top >= 0 && rect.top < windowHeight && " +
+                                    "          rect.left >= 0 && rect.left < window.innerWidth && " +
+                                    "          rect.bottom > 0 && rect.right > 0);" +
+                                    "}" +
+                                    "return false;"
                     );
                     if (Boolean.TRUE.equals(checkResult)) {
                         System.out.println("Pinning dropdown is now visible");
@@ -287,13 +287,13 @@ public class VariantLockAction extends VariantPage {
                 System.out.println("Attempt " + (attempt + 1) + " failed: " + e.getMessage());
             }
         }
-        
+
         // Final attempt: try using FluentWebElement if available
         System.out.println("Final attempt: trying with FluentWebElement...");
         try {
             awaitTillElementDisplayed(pinningDropdown);
-            js.executeScript("arguments[0].scrollIntoView({block: 'center', behavior: 'auto'});", 
-                            pinningDropdown.getElement());
+            js.executeScript("arguments[0].scrollIntoView({block: 'center', behavior: 'auto'});",
+                    pinningDropdown.getElement());
             ThreadWait();
             System.out.println("Successfully scrolled to pinning dropdown using FluentWebElement");
         } catch (Exception e) {
@@ -322,12 +322,12 @@ public class VariantLockAction extends VariantPage {
         for (int i = 0; i < 5; i++) {
             try {
                 Object result = js.executeScript(
-                    "var element = document.querySelector('.pin-sel-summary');" +
-                    "if (element) {" +
-                    "  element.scrollIntoView({block: 'center', behavior: 'auto'});" +
-                    "  return true;" +
-                    "}" +
-                    "return false;"
+                        "var element = document.querySelector('.pin-sel-summary');" +
+                                "if (element) {" +
+                                "  element.scrollIntoView({block: 'center', behavior: 'auto'});" +
+                                "  return true;" +
+                                "}" +
+                                "return false;"
                 );
                 if (Boolean.TRUE.equals(result)) {
                     System.out.println("Successfully scrolled to pinning dropdown");
@@ -360,12 +360,12 @@ public class VariantLockAction extends VariantPage {
         for (int i = 0; i < 5; i++) {
             try {
                 Object result = js.executeScript(
-                    "var element = document.querySelector('.variant-lock-summary-box');" +
-                    "if (element) {" +
-                    "  element.scrollIntoView({block: 'center', behavior: 'auto'});" +
-                    "  return true;" +
-                    "}" +
-                    "return false;"
+                        "var element = document.querySelector('.variant-lock-summary-box');" +
+                                "if (element) {" +
+                                "  element.scrollIntoView({block: 'center', behavior: 'auto'});" +
+                                "  return true;" +
+                                "}" +
+                                "return false;"
                 );
                 if (Boolean.TRUE.equals(result)) {
                     System.out.println("Successfully scrolled to variant strategy summary");
@@ -392,14 +392,14 @@ public class VariantLockAction extends VariantPage {
         for (int i = 0; i < 5; i++) {
             try {
                 Object result = js.executeScript(
-                    "var element = document.querySelector('.lhs-footer-button');" +
-                    "if (!element) { element = document.querySelector('.unx-qa-apply-merchcondition'); }" +
-                    "if (!element) { element = document.querySelector('button.unx-qa-apply-merchcondition'); }" +
-                    "if (element) {" +
-                    "  element.scrollIntoView({block: 'center', behavior: 'auto'});" +
-                    "  return true;" +
-                    "}" +
-                    "return false;"
+                        "var element = document.querySelector('.lhs-footer-button');" +
+                                "if (!element) { element = document.querySelector('.unx-qa-apply-merchcondition'); }" +
+                                "if (!element) { element = document.querySelector('button.unx-qa-apply-merchcondition'); }" +
+                                "if (element) {" +
+                                "  element.scrollIntoView({block: 'center', behavior: 'auto'});" +
+                                "  return true;" +
+                                "}" +
+                                "return false;"
                 );
                 if (Boolean.TRUE.equals(result)) {
                     System.out.println("Successfully scrolled to footer button area");
@@ -448,12 +448,12 @@ public class VariantLockAction extends VariantPage {
         for (int i = 0; i < 5; i++) {
             try {
                 Object result = js.executeScript(
-                    "var element = document.querySelector('.pin-dd-item');" +
-                    "if (element) {" +
-                    "  element.scrollIntoView({block: 'center', behavior: 'auto'});" +
-                    "  return true;" +
-                    "}" +
-                    "return false;"
+                        "var element = document.querySelector('.pin-dd-item');" +
+                                "if (element) {" +
+                                "  element.scrollIntoView({block: 'center', behavior: 'auto'});" +
+                                "  return true;" +
+                                "}" +
+                                "return false;"
                 );
                 if (Boolean.TRUE.equals(result)) {
                     System.out.println("Successfully scrolled to pinning dropdown list");
@@ -468,7 +468,7 @@ public class VariantLockAction extends VariantPage {
         }
     }
 
-//    public void selectVariantPinningProduct() {
+    //    public void selectVariantPinningProduct() {
 //        selectVariantPinningProduct(0);
 //    }
     public void selectVariantPinningPosition(int positionIndex) {
@@ -498,7 +498,9 @@ public class VariantLockAction extends VariantPage {
      * @return Number of product cards found
      */
     public int getProductCount() {
+        ThreadWait();
         awaitTillElementDisplayed(findFirst(".product-card"));
+        ThreadWait();
         return productCards.size();
     }
 
@@ -507,7 +509,9 @@ public class VariantLockAction extends VariantPage {
      * @return First product card element
      */
     public FluentWebElement getFirstProduct() {
+        ThreadWait();
         awaitTillElementDisplayed(findFirst(".product-card"));
+        ThreadWait();
         Assert.assertTrue(productCards.size() > 0, "No products found in preview");
         return productCards.get(0);
     }
@@ -518,7 +522,9 @@ public class VariantLockAction extends VariantPage {
      * @return Product card element at the specified index
      */
     public FluentWebElement getProductByIndex(int index) {
+        ThreadWait();
         awaitTillElementDisplayed(findFirst(".product-card"));
+        ThreadWait();
         Assert.assertTrue(productCards.size() > index, "Product index out of bounds. Total products: " + productCards.size());
         return productCards.get(index);
     }
@@ -811,7 +817,7 @@ public class VariantLockAction extends VariantPage {
                     }
                 }
             }
-            
+
             // Also check the field-name span for variantId
             FluentWebElement fieldName = field.findFirst(".field-name");
             if (fieldName != null) {
@@ -828,7 +834,7 @@ public class VariantLockAction extends VariantPage {
                 }
             }
         }
-        
+
         // Method 2: Fallback - try to get from variant container (if additional-field-item not found)
         FluentWebElement firstVariant = getFirstVariant(product);
         if (firstVariant != null) {
@@ -837,7 +843,7 @@ public class VariantLockAction extends VariantPage {
                 return variantId;
             }
         }
-        
+
         return "";
     }
 
@@ -860,13 +866,13 @@ public class VariantLockAction extends VariantPage {
                     }
                 }
             }
-            
+
             // Also check the field-name span for date_iso
             FluentWebElement fieldName = field.findFirst(".field-name");
             if (fieldName != null) {
                 String fieldNameText = fieldName.getText();
-                if (fieldNameText != null && (fieldNameText.toLowerCase().contains("date_iso:") || 
-                    fieldNameText.toLowerCase().contains("dateiso:"))) {
+                if (fieldNameText != null && (fieldNameText.toLowerCase().contains("date_iso:") ||
+                        fieldNameText.toLowerCase().contains("dateiso:"))) {
                     // Get the value from field-value span
                     FluentWebElement fieldValue = field.findFirst(".field-value");
                     if (fieldValue != null && fieldValue.isDisplayed()) {
@@ -919,7 +925,7 @@ public class VariantLockAction extends VariantPage {
         threadWait();
         awaitForPageToLoad();
         ThreadWait();
-        
+
         // Find the rule element
         FluentWebElement ruleElement = findFirst(".campaign-name-promotions, .campaign-name-banners");
         if (ruleElement == null) {
@@ -927,7 +933,7 @@ public class VariantLockAction extends VariantPage {
             return false;
         }
         awaitTillElementDisplayed(activeStatus);
-        
+
         // Check for pending sync status
         if ("Pending Sync".equalsIgnoreCase(expectedStatus) || "Pending".equalsIgnoreCase(expectedStatus)) {
             try {
@@ -956,7 +962,7 @@ public class VariantLockAction extends VariantPage {
                 return false;
             }
         }
-        
+
         return false;
     }
 
@@ -980,7 +986,7 @@ public class VariantLockAction extends VariantPage {
         threadWait();
         awaitForPageToLoad();
         ThreadWait();
-        
+
 //        // Find the rule
 //        FluentWebElement ruleElement = searchPageActions.queryRuleByName(query);
 //        Assert.assertNotNull(ruleElement, "Promotion rule not found: " + query);
@@ -988,7 +994,7 @@ public class VariantLockAction extends VariantPage {
         // Wait and check for pending sync status
         threadWait();
         ThreadWait();
-        
+
         // Look for pending sync badge
         boolean pendingFound = false;
         try {
@@ -1001,7 +1007,7 @@ public class VariantLockAction extends VariantPage {
         } catch (Exception e) {
             // Try alternative method
         }
-        
+
         // Alternative: check status badges
         if (!pendingFound) {
             FluentList<FluentWebElement> statusBadges = find(".unbxd-pill, .status-badge, .custom-pill");
@@ -1014,7 +1020,7 @@ public class VariantLockAction extends VariantPage {
                 }
             }
         }
-        
+
         Assert.assertTrue(pendingFound, "PROMOTION RULE IS NOT IN PENDING SYNC STATE for query: " + query);
         System.out.println("Rule '" + query + "' is in Pending Sync status");
     }
@@ -1044,7 +1050,7 @@ public class VariantLockAction extends VariantPage {
         threadWait();
         awaitForPageToLoad();
         ThreadWait();
-        
+
         // Wait for sync button to be visible and clickable
         awaitTillElementDisplayed(searchPageActions.syncButton);
         ThreadWait();
@@ -1052,24 +1058,24 @@ public class VariantLockAction extends VariantPage {
         ThreadWait();
         threadWait();
         System.out.println("Sync button clicked");
-        
+
         // Wait for confirmation modal to appear
         awaitTillElementDisplayed(searchPageActions.syncModalContent);
         ThreadWait();
-        
+
         // Verify modal title
         if (searchPageActions.syncConfirmTitle != null && searchPageActions.syncConfirmTitle.isDisplayed()) {
             String title = searchPageActions.syncConfirmTitle.getText();
             System.out.println("Sync confirmation modal appeared with title: " + title);
         }
-        
+
         // Click Yes button to confirm sync
         awaitTillElementDisplayed(searchPageActions.syncConfirmYesButton);
         ThreadWait();
         searchPageActions.syncConfirmYesButton.click();
         ThreadWait();
         threadWait();
-        
+
         // Wait for modal to close
         ThreadWait();
         System.out.println("Sync confirmed and initiated");
@@ -1081,11 +1087,11 @@ public class VariantLockAction extends VariantPage {
     public void verifySyncInfoMessage() {
         ThreadWait();
         threadWait();
-        
+
         // Wait for toast notification to appear
         boolean messageFound = false;
         String expectedMessage = "Promotions are syncing and changes will be reflected shortly.";
-        
+
         try {
             // Method 1: Check using the specific toast element
             if (searchPageActions.syncInfoToast != null) {
@@ -1102,7 +1108,7 @@ public class VariantLockAction extends VariantPage {
         } catch (Exception e) {
             System.out.println("Sync info toast not found using direct selector: " + e.getMessage());
         }
-        
+
         // Method 2: Try to find the toast by searching for the message text
         if (!messageFound) {
             try {
@@ -1116,7 +1122,7 @@ public class VariantLockAction extends VariantPage {
                 System.out.println("Could not find sync info message: " + e.getMessage());
             }
         }
-        
+
         // Method 3: Search for the toast by class and verify message
         if (!messageFound) {
             try {
@@ -1133,7 +1139,7 @@ public class VariantLockAction extends VariantPage {
                 System.out.println("Could not find sync info toast: " + e.getMessage());
             }
         }
-        
+
         System.out.println("Sync info message verified: " + expectedMessage);
     }
 
@@ -1178,15 +1184,15 @@ public class VariantLockAction extends VariantPage {
         threadWait();
         awaitForPageToLoad();
         ThreadWait();
-        
+
         // Find the rule
         FluentWebElement ruleElement = searchPageActions.queryRuleByName(query);
         Assert.assertNotNull(ruleElement, "Promotion rule not found: " + query);
-        
+
         // Wait and check for syncing status
         threadWait();
         ThreadWait();
-        
+
         // Look for syncing status badge
         boolean syncingFound = false;
         try {
@@ -1209,7 +1215,7 @@ public class VariantLockAction extends VariantPage {
                 System.out.println("Syncing status element not found: " + e2.getMessage());
             }
         }
-        
+
         // Alternative: check status badges in the rule element
         if (!syncingFound) {
             try {
@@ -1223,7 +1229,7 @@ public class VariantLockAction extends VariantPage {
                 System.out.println("Could not find syncing status in rule element");
             }
         }
-        
+
         Assert.assertTrue(syncingFound, "PROMOTION RULE IS NOT IN SYNCING STATE for query: " + query);
         System.out.println("Rule '" + query + "' is in Syncing status");
     }
@@ -1243,7 +1249,7 @@ public class VariantLockAction extends VariantPage {
         By syncingStatusLocator = By.cssSelector(".status-btn__variant");
         int numOfRetries = Config.getIntValueForProperty("indexing.numOfRetries");
         int waitTime = Config.getIntValueForProperty("indexing.wait.time");
-        
+
         // Loop with refresh, similar to waitForElementAppear pattern
         for (int i = 0; i < numOfRetries; i++) {
             try {
@@ -1251,12 +1257,12 @@ public class VariantLockAction extends VariantPage {
                 ThreadWait();
                 awaitForPageToLoad();
                 ThreadWait();
-                
+
                 System.out.println("Waiting for syncing status to disappear - attempt " + (i + 1) + " of " + numOfRetries);
-                
+
                 // Use waitForLoaderToDisAppear with the locator and Config values
                 waitForLoaderToDisAppear(syncingStatusLocator, "syncing status", 1, waitTime);
-                
+
                 // Verify syncing is actually gone
                 try {
                     FluentWebElement syncingElement = findFirst(".status-btn__variant");
@@ -1272,7 +1278,7 @@ public class VariantLockAction extends VariantPage {
                     ThreadWait();
                     return;
                 }
-                
+
             } catch (Exception e) {
                 System.out.println("Exception while waiting for syncing status to disappear (attempt " + (i + 1) + "): " + e.getMessage());
                 if (i == numOfRetries - 1) {
@@ -1281,7 +1287,7 @@ public class VariantLockAction extends VariantPage {
                 }
             }
         }
-        
+
         // Final check
         refreshPage();
         ThreadWait();
@@ -1322,7 +1328,7 @@ public class VariantLockAction extends VariantPage {
         } catch (Exception e) {
             System.out.println("Variant Locking element not found using direct selector: " + e.getMessage());
         }
-        
+
         // Method 2: Check all campaign type texts
         if (!variantLockingFound) {
             try {
@@ -1330,8 +1336,8 @@ public class VariantLockAction extends VariantPage {
                     if (campaignTypeText != null && campaignTypeText.isDisplayed()) {
                         String campaignType = campaignTypeText.getText().trim();
                         String title = campaignTypeText.getAttribute("title");
-                        if (campaignType.equalsIgnoreCase("Variant Locking") || 
-                            (title != null && title.equalsIgnoreCase("Variant Locking"))) {
+                        if (campaignType.equalsIgnoreCase("Variant Locking") ||
+                                (title != null && title.equalsIgnoreCase("Variant Locking"))) {
                             variantLockingFound = true;
                             System.out.println("Found Variant Locking in campaign type texts: " + campaignType);
                             break;
@@ -1342,7 +1348,7 @@ public class VariantLockAction extends VariantPage {
                 System.out.println("Could not find Variant Locking in campaign type texts: " + e.getMessage());
             }
         }
-        
+
         Assert.assertTrue(variantLockingFound, "VARIANT LOCKING CAMPAIGN TYPE IS NOT DISPLAYED for query: " + query);
         System.out.println("Variant Locking campaign type is displayed for rule: " + query);
     }
@@ -1370,7 +1376,7 @@ public class VariantLockAction extends VariantPage {
         ThreadWait();
         awaitTillElementDisplayed(variantLockModal);
         ThreadWait();
-        
+
         if (variantItems.size() > variantIndex) {
             FluentWebElement variantItem = variantItems.get(variantIndex);
             ThreadWait();
@@ -1391,7 +1397,7 @@ public class VariantLockAction extends VariantPage {
         ThreadWait();
         awaitTillElementDisplayed(variantLockModal);
         ThreadWait();
-        
+
         if (variantItems.size() > variantIndex) {
             FluentWebElement variantItem = variantItems.get(variantIndex);
             FluentWebElement variantIdElement = variantItem.findFirst(".variant-id");
@@ -1441,22 +1447,22 @@ public class VariantLockAction extends VariantPage {
         ThreadWait();
         // Get variant ID from preview
         String previewVariantId = getVariantIdFromPreview(product);
-        
+
         System.out.println("Saved VariantId from modal: " + savedVariantId);
         System.out.println("Preview VariantId: " + previewVariantId);
-        
+
         // Verify variant ID matches
         Assert.assertFalse(savedVariantId.isEmpty(), "Saved VariantId is empty");
         Assert.assertFalse(previewVariantId.isEmpty(), "Preview VariantId is empty");
         Assert.assertEquals(previewVariantId, savedVariantId, "VariantId mismatch: Modal=" + savedVariantId + ", Preview=" + previewVariantId);
-        
+
         // Verify lock icon is present in the variant
         FluentWebElement firstVariant = getFirstVariant(product);
         Assert.assertNotNull(firstVariant, "First variant not found in product");
-        
+
         boolean isLocked = isVariantLocked(firstVariant);
         Assert.assertTrue(isLocked, "Variant lock icon not found in preview for variant: " + savedVariantId);
-        
+
         System.out.println("VariantId and lock icon verification passed for: " + savedVariantId);
     }
 
@@ -1468,18 +1474,18 @@ public class VariantLockAction extends VariantPage {
     public String selectAndLockFirstVariantFromModal(FluentWebElement product) {
         // Open variant lock modal
         openVariantLockModal(product);
-        
+
         // Click on first variant (index 0)
         clickVariantInModal(1);
-        
+
         // Get variant ID from modal
         String variantId = getVariantIdFromModal(1);
         Assert.assertFalse(variantId.isEmpty(), "Variant ID not found in modal");
         System.out.println("Selected variant ID from modal: " + variantId);
-        
+
         // Apply the lock
         applyVariantLockInModal();
-        
+
         // Wait for preview to update
         ThreadWait();
         return variantId;
@@ -1494,27 +1500,27 @@ public class VariantLockAction extends VariantPage {
         threadWait();
         awaitForPageToLoad();
         ThreadWait();
-        
+
         // Wait for products to load
         waitForProductsToLoad();
-        
+
         // Get product count
         int productCount = getProductCount();
         System.out.println("Product count in preview: " + productCount);
-        
+
         if (productCount > 0) {
             // Get the first product
             FluentWebElement firstProduct = getFirstProduct();
             Assert.assertNotNull(firstProduct, "First product not found");
-            
+
             // Get variant ID from the first product's additional-field-item
             String productVariantId = getVariantIdFromPreview(firstProduct);
             System.out.println("Variant ID from first product: " + productVariantId);
-            
+
             // Get the locked variant (first variant) from the product
             FluentWebElement firstVariant = getFirstVariant(firstProduct);
             Assert.assertNotNull(firstVariant, "First variant not found in first product");
-            
+
             // Get variant ID from the locked variant (if available in data attributes)
             String previewVariantId = "";
             try {
@@ -1530,22 +1536,22 @@ public class VariantLockAction extends VariantPage {
             } catch (Exception e) {
                 System.out.println("Could not get variant ID from variant element: " + e.getMessage());
             }
-            
+
             // If we couldn't get from variant element, use the product's variant ID
             if (previewVariantId == null || previewVariantId.isEmpty()) {
                 previewVariantId = productVariantId;
             }
-            
+
             System.out.println("Variant ID from preview (locked variant): " + previewVariantId);
-            
+
             // Verify both variant IDs are not empty
             Assert.assertFalse(productVariantId.isEmpty(), "Variant ID not found in first product");
             Assert.assertFalse(previewVariantId.isEmpty(), "Variant ID not found in preview");
-            
+
             // Verify they match
-            Assert.assertEquals(productVariantId, previewVariantId, 
-                "Variant ID mismatch: Product=" + productVariantId + ", Preview=" + previewVariantId);
-            
+            Assert.assertEquals(productVariantId, previewVariantId,
+                    "Variant ID mismatch: Product=" + productVariantId + ", Preview=" + previewVariantId);
+
             System.out.println("Variant ID verification passed: " + productVariantId);
         } else {
             Assert.fail("No products found in preview to verify variant ID");

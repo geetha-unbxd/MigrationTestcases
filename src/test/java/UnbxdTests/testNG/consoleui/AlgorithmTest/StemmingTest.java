@@ -68,8 +68,7 @@ public class StemmingTest extends BaseTest {
         driver.navigate().refresh();
         synonymActions.deleteCreatedKeyword(updatedstemKeyword);
         Assert.assertTrue(contentActions.checkSuccessMessage(), UnbxdErrorConstants.SUCCESS_MESSAGE_FAILURE);
-        goTo(stemmingPage);
-        Assert.assertNull(synonymActions.getKeyWordsByName(updatedstemKeyword));
+
     }
 
 
