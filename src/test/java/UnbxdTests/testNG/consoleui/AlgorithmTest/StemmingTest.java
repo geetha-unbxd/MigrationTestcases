@@ -60,14 +60,15 @@ public class StemmingTest extends BaseTest {
         FluentWebElement stemword= synonymActions.getKeyWordsByName(stemKeyWord);
 
         String updatedstemKeyword="editstem"+System.currentTimeMillis();
+        Thread.sleep(1000);
         contentActions.editKeyword(stemword,updatedstemKeyword,null,null);
         conceptsActions.saveChanges();
 
         Assert.assertTrue(contentActions.checkSuccessMessage(), UnbxdErrorConstants.SUCCESS_MESSAGE_FAILURE);
-
+        driver.navigate().refresh();
         synonymActions.deleteCreatedKeyword(updatedstemKeyword);
         Assert.assertTrue(contentActions.checkSuccessMessage(), UnbxdErrorConstants.SUCCESS_MESSAGE_FAILURE);
-
+        goTo(stemmingPage);
         Assert.assertNull(synonymActions.getKeyWordsByName(updatedstemKeyword));
     }
 

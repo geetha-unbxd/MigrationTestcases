@@ -56,11 +56,14 @@ public FluentWebElement getSynonymByIndex(int index)
 
 public FluentWebElement getKeyWordsByName(String name) throws InterruptedException
 {
+    Thread.sleep(5000);
     click(synonymsSearchBox);
+    ThreadWait();
     searchBoxOpen.fill().with(name);
     awaitForElementPresence(synonymsLists);
     for (int i = 0; i< find(".rdt_TableBody .rdt_TableRow").size(); i++)
     {
+        Thread.sleep(5000);
         if(find(".rdt_TableBody .rdt_TableRow").get(i).find(keywordCssLocator).getValue().trim().contains(name))
         {
             ThreadWait();

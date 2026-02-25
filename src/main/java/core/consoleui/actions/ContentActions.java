@@ -37,7 +37,10 @@ public class ContentActions extends SynonymsPage {
     public void editKeyword(FluentWebElement element, String keyword, String uni, String bi)
     {
         if(keyword!=null && keyword!="") {
-            element.findFirst(keyWord).click();
+            //element.findFirst(keyWord).click();
+            ThreadWait();
+            keyWordInputEdit.clear();
+            ThreadWait();
             keyWordInputEdit.fill().with(keyword);
         }
         if(uni!=null && uni!="") {
