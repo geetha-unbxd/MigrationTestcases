@@ -53,8 +53,6 @@ public class browseVariantPinning extends MerchVTest {
         page = variantPinningJsonObject.get("query").getAsString();
 
         goTo(browsePage);
-        ThreadWait();
-        await();
         createGlobalRulePromotion();
         // In preview: get product count, if > 0, click variant lock on first product, select first variant, and verify
         variantLockAction.waitForProductsToLoad();
@@ -64,21 +62,17 @@ public class browseVariantPinning extends MerchVTest {
         if (previewProductCount > 0) {
             FluentWebElement firstProduct = variantLockAction.getFirstProduct();
             String savedVariantId = variantLockAction.selectAndLockFirstVariantFromModal(firstProduct);
-            ThreadWait();
+            searchPage.threadWait();
             variantLockAction.waitForProductsToLoad();
-            ThreadWait();
             firstProduct = variantLockAction.getFirstProduct();
             variantLockAction.verifyVariantIdAndLockInPreview(firstProduct, savedVariantId);
         } else {
             Assert.fail("No products found in preview to test variant lock");
         }
-        ThreadWait();
         merchandisingActions.publishCampaign();
         merchandisingActions.verifySuccessMessage();
-        ThreadWait();
 
         goTo(browsePage);
-        searchPage.threadWait();
         searchPage.editGlobalRule();
         // Get the first product to verify UniqueId and VariantId
         FluentWebElement firstProduct = variantLockAction.getFirstProduct();
@@ -86,6 +80,9 @@ public class browseVariantPinning extends MerchVTest {
         // Extract UniqueId and VariantId from summary and verify in preview
         String summaryUniqueId = variantLockAction.getUniqueIdFromSummary();
         String summaryVariantId = variantLockAction.getVariantIdFromSummary();
+
+        // Re-fetch first product before reading preview to avoid stale element after summary load
+        firstProduct = variantLockAction.getFirstProduct();
         String previewUniqueId = variantLockAction.getUniqueIdFromPreview(firstProduct);
         String previewVariantId = variantLockAction.getVariantIdFromPreview(firstProduct);
 
@@ -105,7 +102,6 @@ public class browseVariantPinning extends MerchVTest {
         System.out.println("UniqueId and VariantId verification passed");
         merchandisingActions.publishCampaign();
         merchandisingActions.verifySuccessMessage();
-        ThreadWait();
 
         // Verify status - check for Active first, then Pending Sync
         variantLockAction.verifyActiveOrPendingSyncStatus(page);

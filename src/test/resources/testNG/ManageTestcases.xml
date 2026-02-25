@@ -221,97 +221,97 @@
         </classes>
     </test>
 
-<!--    &lt;!&ndash; VariantPinning methods &ndash;&gt;-->
-<!--    <test name="ManageVariantPinning - SearchVariantPinning - searchGlobalVariantPinningTest">-->
-<!--        <classes>-->
-<!--            <class name="UnbxdTests.testNG.consoleui.variantLockTest.searchVariantPinning">-->
-<!--                <methods>-->
-<!--                    <include name="searchGlobalVariantPinningTest"/>-->
-<!--                </methods>-->
-<!--            </class>-->
-<!--        </classes>-->
-<!--    </test>-->
-<!--    <test name="ManageVariantPinning - SearchVariantPinning - searchVariantPinningCreateEditDeleteTest">-->
-<!--        <classes>-->
-<!--            <class name="UnbxdTests.testNG.consoleui.variantLockTest.searchVariantPinning">-->
-<!--                <methods>-->
-<!--                    <include name="searchVariantPinningCreateEditDeleteTest"/>-->
-<!--                </methods>-->
-<!--            </class>-->
-<!--        </classes>-->
-<!--    </test>-->
-<!--    <test name="ManageVariantPinning - SearchVariantPinning - searchVariantPinningWithSyncTest">-->
-<!--        <classes>-->
-<!--            <class name="UnbxdTests.testNG.consoleui.variantLockTest.searchVariantPinning">-->
-<!--                <methods>-->
-<!--                    <include name="searchVariantPinningWithSyncTest"/>-->
-<!--                </methods>-->
-<!--            </class>-->
-<!--        </classes>-->
-<!--    </test>-->
-<!--    <test name="ManageVariantPinning - SearchVariantPinning - searchVariantPinningWithPendingSyncTest">-->
-<!--        <classes>-->
-<!--            <class name="UnbxdTests.testNG.consoleui.variantLockTest.searchVariantPinning">-->
-<!--                <methods>-->
-<!--                    <include name="searchVariantPinningWithPendingSyncTest"/>-->
-<!--                </methods>-->
-<!--            </class>-->
-<!--        </classes>-->
-<!--    </test>-->
-<!--    <test name="ManageVariantPinning - SearchVariantPinning - searchVariantPinningABPendingSyncTest">-->
-<!--        <classes>-->
-<!--            <class name="UnbxdTests.testNG.consoleui.variantLockTest.searchVariantPinning">-->
-<!--                <methods>-->
-<!--                    <include name="searchVariantPinningABPendingSyncTest"/>-->
-<!--                </methods>-->
-<!--            </class>-->
-<!--        </classes>-->
-<!--    </test>-->
-<!--    <test name="ManageVariantPinning - BrowseVariantPinning - browseGlobalVariantPinningTest">-->
-<!--        <classes>-->
-<!--            <class name="UnbxdTests.testNG.consoleui.variantLockTest.browseVariantPinning">-->
-<!--                <methods>-->
-<!--                    <include name="browseGlobalVariantPinningTest"/>-->
-<!--                </methods>-->
-<!--            </class>-->
-<!--        </classes>-->
-<!--    </test>-->
-<!--    <test name="ManageVariantPinning - BrowseVariantPinning - browseVariantPinningCreateEditDeleteTest">-->
-<!--        <classes>-->
-<!--            <class name="UnbxdTests.testNG.consoleui.variantLockTest.browseVariantPinning">-->
-<!--                <methods>-->
-<!--                    <include name="browseVariantPinningCreateEditDeleteTest"/>-->
-<!--                </methods>-->
-<!--            </class>-->
-<!--        </classes>-->
-<!--    </test>-->
-<!--    <test name="ManageVariantPinning - BrowseVariantPinning - browseVariantPinningWithSyncTest">-->
-<!--        <classes>-->
-<!--            <class name="UnbxdTests.testNG.consoleui.variantLockTest.browseVariantPinning">-->
-<!--                <methods>-->
-<!--                    <include name="browseVariantPinningWithSyncTest"/>-->
-<!--                </methods>-->
-<!--            </class>-->
-<!--        </classes>-->
-<!--    </test>-->
-<!--    <test name="ManageVariantPinning - BrowseVariantPinning - browseVariantPinningWithPendingSyncTest">-->
-<!--        <classes>-->
-<!--            <class name="UnbxdTests.testNG.consoleui.variantLockTest.browseVariantPinning">-->
-<!--                <methods>-->
-<!--                    <include name="browseVariantPinningWithPendingSyncTest"/>-->
-<!--                </methods>-->
-<!--            </class>-->
-<!--        </classes>-->
-<!--    </test>-->
-<!--    <test name="ManageVariantPinning - BrowseVariantPinning - browseVariantPinningABPendingSyncTest">-->
-<!--        <classes>-->
-<!--            <class name="UnbxdTests.testNG.consoleui.variantLockTest.browseVariantPinning">-->
-<!--                <methods>-->
-<!--                    <include name="browseVariantPinningABPendingSyncTest"/>-->
-<!--                </methods>-->
-<!--            </class>-->
-<!--        </classes>-->
-<!--    </test>-->
+    <!-- VariantPinning methods -->
+    <test name="ManageVariantPinning - SearchVariantPinning - searchGlobalVariantPinningTest">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.variantLockTest.searchVariantPinning">
+                <methods>
+                    <include name="searchGlobalVariantPinningTest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="ManageVariantPinning - SearchVariantPinning - searchVariantPinningCreateEditDeleteTest">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.variantLockTest.searchVariantPinning">
+                <methods>
+                    <include name="searchVariantPinningCreateEditDeleteTest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="ManageVariantPinning - SearchVariantPinning - searchVariantPinningWithSyncTest">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.variantLockTest.searchVariantPinning">
+                <methods>
+                    <include name="searchVariantPinningWithSyncTest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="ManageVariantPinning - SearchVariantPinning - searchVariantPinningWithPendingSyncTest">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.variantLockTest.searchVariantPinning">
+                <methods>
+                    <include name="searchVariantPinningWithPendingSyncTest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="ManageVariantPinning - SearchVariantPinning - searchVariantPinningABPendingSyncTest">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.variantLockTest.searchVariantPinning">
+                <methods>
+                    <include name="searchVariantPinningABPendingSyncTest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="ManageVariantPinning - BrowseVariantPinning - browseGlobalVariantPinningTest">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.variantLockTest.browseVariantPinning">
+                <methods>
+                    <include name="browseGlobalVariantPinningTest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="ManageVariantPinning - BrowseVariantPinning - browseVariantPinningCreateEditDeleteTest">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.variantLockTest.browseVariantPinning">
+                <methods>
+                    <include name="browseVariantPinningCreateEditDeleteTest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="ManageVariantPinning - BrowseVariantPinning - browseVariantPinningWithSyncTest">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.variantLockTest.browseVariantPinning">
+                <methods>
+                    <include name="browseVariantPinningWithSyncTest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="ManageVariantPinning - BrowseVariantPinning - browseVariantPinningWithPendingSyncTest">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.variantLockTest.browseVariantPinning">
+                <methods>
+                    <include name="browseVariantPinningWithPendingSyncTest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="ManageVariantPinning - BrowseVariantPinning - browseVariantPinningABPendingSyncTest">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.variantLockTest.browseVariantPinning">
+                <methods>
+                    <include name="browseVariantPinningABPendingSyncTest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
 
 
 </suite>
