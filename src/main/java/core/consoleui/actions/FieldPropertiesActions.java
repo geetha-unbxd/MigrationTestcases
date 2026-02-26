@@ -89,6 +89,7 @@ public class FieldPropertiesActions extends FieldPropertiesPage {
                 if (autoSuggestCheckbox != null && autoSuggestCheckbox.isDisplayed()) {
                     awaitForElementPresence(autoSuggestCheckbox);
                     ThreadWait();
+                    ThreadWait();
                     autoSuggestCheckbox.click();
                     ThreadWait();
                 }
