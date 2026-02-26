@@ -272,30 +272,27 @@ public class searchVariantPinning extends MerchVTest {
         // Verify status - check for Active first, then Pending Sync
         variantLockAction.verifyActiveOrPendingSyncStatus(query);
 
-        // Click on sync button and confirm
         variantLockAction.clickSyncButton();
-
+        ThreadWait();
         // Verify the sync info toast message
         searchPageActions.awaitTillElementDisplayed(searchPageActions.syncInfoToast);
-
+        ThreadWait();
         // Refresh the page and verify syncing status
         variantLockAction.refreshAndCheckSyncingStatus();
-
-        // Wait for and verify Variant Locking is displayed
-        variantLockAction.refreshPage();
+        // Wait for syncing to disappear; once syncing is gone, proceed to next step
         variantLockAction.waitSyncingNotToBeDisplayed(query);
+        System.out.println("Syncing went gone - proceeding to next step");
+        // Next step: wait for Variant Locking campaign type to be displayed
         searchPageActions.awaitTillElementDisplayed(searchPageActions.variantLockingCampaignType);
 
         //Website Preview
         merchandisingActions.openPreviewAndSwitchTheTab();
         merchandisingActions.awaitForPageToLoad();
-
         String previewPage = driver.getCurrentUrl();
         //Assert.assertTrue(previewPage.contains("preview"),"Not redirecting to preview page");
         merchandisingActions.awaitForElementPresence(merchandisingActions.SearchpreviewOption);
         ThreadWait();
         Assert.assertTrue(merchandisingActions.showingResultinPreview.getText().contains(query));
-
         // Verify variant ID in first product matches preview variant ID
         variantLockAction.verifyFirstProductVariantIdMatchesPreview();
 

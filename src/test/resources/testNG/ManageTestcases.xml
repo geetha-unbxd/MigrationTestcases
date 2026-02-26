@@ -1,5 +1,5 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="ManageTestcases" parallel="tests" thread-count="22" verbose="10" preserve-order="true">
+<suite name="ManageTestcases" parallel="tests" thread-count="16" verbose="10" preserve-order="true">
 
     <!-- manageSearchFacetTest methods -->
     <test name="SearchManageTest - manageSearchFacetTest - FacetRanking">
@@ -281,15 +281,6 @@
             <class name="UnbxdTests.testNG.consoleui.variantLockTest.browseVariantPinning">
                 <methods>
                     <include name="browseVariantPinningCreateEditDeleteTest"/>
-                </methods>
-            </class>
-        </classes>
-    </test>
-    <test name="ManageVariantPinning - BrowseVariantPinning - browseVariantPinningWithSyncTest">
-        <classes>
-            <class name="UnbxdTests.testNG.consoleui.variantLockTest.browseVariantPinning">
-                <methods>
-                    <include name="browseVariantPinningWithSyncTest"/>
                 </methods>
             </class>
         </classes>

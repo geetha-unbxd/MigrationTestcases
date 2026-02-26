@@ -1157,6 +1157,46 @@ public class VariantLockAction extends VariantPage {
     }
 
     /**
+     * Verify that the status badge (.status-btn__variant) shows "Pending Sync"
+     * @param query The query/rule name (for logging)
+     */
+    public void verifyPendingSyncBadgeDisplayed(String query) {
+        ThreadWait();
+        threadWait();
+        try {
+            FluentWebElement statusBadge = findFirst(".status-btn__variant");
+            Assert.assertNotNull(statusBadge, "Status badge not found for query: " + query);
+            Assert.assertTrue(statusBadge.isDisplayed(), "Status badge not displayed for query: " + query);
+            String text = statusBadge.getText().trim();
+            Assert.assertTrue(text.toLowerCase().contains("pending") && text.toLowerCase().contains("sync"),
+                    "Expected Pending Sync badge, found: " + text + " for query: " + query);
+            System.out.println("Pending Sync badge verified for query: " + query);
+        } catch (Exception e) {
+            Assert.fail("Pending Sync badge not found or not displayed for query: " + query + " - " + e.getMessage());
+        }
+    }
+
+    /**
+     * Verify that the status badge (.status-btn__variant) shows "Syncing"
+     * @param query The query/rule name (for logging)
+     */
+    public void verifySyncingBadgeDisplayed(String query) {
+        ThreadWait();
+        threadWait();
+        try {
+            FluentWebElement statusBadge = findFirst(".status-btn__variant");
+            Assert.assertNotNull(statusBadge, "Status badge not found for query: " + query);
+            Assert.assertTrue(statusBadge.isDisplayed(), "Status badge not displayed for query: " + query);
+            String text = statusBadge.getText().trim();
+            Assert.assertTrue(text.toLowerCase().contains("syncing"),
+                    "Expected Syncing badge, found: " + text + " for query: " + query);
+            System.out.println("Syncing badge verified for query: " + query);
+        } catch (Exception e) {
+            Assert.fail("Syncing badge not found or not displayed for query: " + query + " - " + e.getMessage());
+        }
+    }
+
+    /**
      * Refresh the page multiple times and check for syncing status
      * This method refreshes the page and verifies that syncing status is displayed
      */
@@ -1241,77 +1281,66 @@ public class VariantLockAction extends VariantPage {
      */
     public void waitSyncingNotToBeDisplayed(String query) throws InterruptedException {
         awaitForPageToLoad();
-        ThreadWait();
+        Thread.sleep(10000);
         refreshPage();
         ThreadWait();
 
+        // Use waitForLoaderToDisAppear with Config values, similar to waitForElementAppear pattern
         By syncingStatusLocator = By.cssSelector(".status-btn__variant");
-        int maxTry = 13;
+        int numOfRetries = Config.getIntValueForProperty("indexing.numOfRetries");
         int waitTime = Config.getIntValueForProperty("indexing.wait.time");
 
-        for (int attempt = 1; attempt <= maxTry; attempt++) {
+        // Loop with refresh, similar to waitForElementAppear pattern
+        for (int i = 0; i < numOfRetries; i++) {
             try {
-                if (attempt > 1) {
-                    refreshPage();
-                    ThreadWait();
-                    awaitForPageToLoad();
-                    ThreadWait();
-                }
+                refreshPage();
+                ThreadWait();
+                awaitForPageToLoad();
+                ThreadWait();
 
-                System.out.println("Waiting for syncing to disappear - attempt " + attempt + " of " + maxTry);
+                System.out.println("Waiting for syncing status to disappear - attempt " + (i + 1) + " of " + numOfRetries);
 
+                // Use waitForLoaderToDisAppear with the locator and Config values
+                waitForLoaderToDisAppear(syncingStatusLocator, "syncing status", 1, waitTime);
+
+                // Verify syncing is actually gone
                 try {
-                    waitForLoaderToDisAppear(syncingStatusLocator, "syncing status", 1, waitTime);
-                } catch (Throwable t) {
-                    System.out.println("Wait for syncing to disappear finished (element may be absent): " + t.getMessage());
-                }
-
-                boolean syncingDisappeared = false;
-                try {
-                    FluentWebElement syncingEl = findFirst(".status-btn__variant");
-                    if (syncingEl == null || !syncingEl.isDisplayed()) {
-                        syncingDisappeared = true;
+                    FluentWebElement syncingElement = findFirst(".status-btn__variant");
+                    if (syncingElement == null || !syncingElement.isDisplayed()) {
+                        System.out.println("Syncing status has disappeared for query: " + query);
+                        ThreadWait();
+                        return;
                     }
                 } catch (Exception e) {
-                    syncingDisappeared = true;
-                }
-
-                if (!syncingDisappeared) {
-                    System.out.println("Syncing still visible, retrying...");
-                    continue;
-                }
-
-                System.out.println("Syncing has disappeared (attempt " + attempt + ")");
-                if (searchPageActions.variantLockingCampaignType != null) {
-                    try {
-                        searchPageActions.awaitTillElementDisplayed(searchPageActions.variantLockingCampaignType);
-                    } catch (Exception e) {
-                        System.out.println("Await for variant locking campaign type: " + e.getMessage());
-                    }
-                }
-                if (isVariantLockingDisplayed()) {
-                    System.out.println("Variant Locking is now visible for query: " + query);
+                    // Element not found - syncing is gone
+                    System.out.println("Syncing status has disappeared for query: " + query);
+                    ThreadWait();
+                    ThreadWait();
                     return;
                 }
-                System.out.println("Variant Locking not yet visible, retrying...");
+
             } catch (Exception e) {
-                System.out.println("Exception on attempt " + attempt + ": " + e.getMessage());
+                System.out.println("Exception while waiting for syncing status to disappear (attempt " + (i + 1) + "): " + e.getMessage());
+                if (i == numOfRetries - 1) {
+                    // Last attempt failed
+                    Assert.fail("Syncing status did not disappear within " + numOfRetries + " attempts for query: " + query);
+                }
             }
         }
 
-        boolean syncingGone = false;
+        // Final check
+        refreshPage();
+        ThreadWait();
         try {
-            FluentWebElement syncingEl = findFirst(".status-btn__variant");
-            if (syncingEl == null || !syncingEl.isDisplayed()) {
-                syncingGone = true;
+            FluentWebElement syncingElement = findFirst(".status-btn__variant");
+            if (syncingElement != null && syncingElement.isDisplayed()) {
+                Assert.fail("Syncing status did not disappear within " + numOfRetries + " attempts for query: " + query);
             }
         } catch (Exception e) {
-            syncingGone = true;
+            // Element not found - syncing is gone
+            System.out.println("Syncing status has disappeared for query: " + query);
         }
-        if (!syncingGone) {
-            Assert.fail("Syncing did not disappear within " + maxTry + " attempts for query: " + query);
-        }
-        Assert.fail("Variant Locking was not visible within " + maxTry + " attempts for query: " + query);
+        ThreadWait();
     }
 
     /**

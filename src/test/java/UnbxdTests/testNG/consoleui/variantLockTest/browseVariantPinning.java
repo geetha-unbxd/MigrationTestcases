@@ -115,31 +115,23 @@ public class browseVariantPinning extends MerchVTest {
         page = variantPinningJsonObject.get("query").getAsString()+System.currentTimeMillis();
 
         goTo(browsePage);
-        searchPage.threadWait();
         createPromotion(page,false,false);
         Map<String, Object> campaignData = merchandisingActions.getCampaignData("variantPinning.json");
 
         searchPageActions.pageRuleDropdown.click();
-        searchPageActions.threadWait();
         searchPageActions.awaitForElementPresence(searchPageActions.BuildPath);
         searchPageActions.BuildPath.click();
         searchPageActions.SelectedCategoryPathDisplay.fill().with(page);
-        searchPageActions.threadWait();
         searchPageActions.categorypathApplyButton.click();
         merchandisingActions.fillCampaignData(campaignData);
-        ThreadWait();
         merchandisingActions.goToLandingPage();
-        ThreadWait();
         variantLockAction.scrollToBottomUntilVariantLockVisible();
         // Click on Lock element
         variantLockAction.variantlock();
-        ThreadWait();
         variantLockAction.waitAndScrollToPinningDropdown();
         variantLockAction.selectVariantPinningProduct(0);
-        ThreadWait();
         variantLockAction.selectVariantPinningPosition(0);
         merchandisingActions.clickOnApplyButton();
-        ThreadWait();
 
         // Wait for products to be visible and verify first variant is locked
         variantLockAction.waitForProductsToLoad();
@@ -155,7 +147,6 @@ public class browseVariantPinning extends MerchVTest {
         ThreadWait();
         merchandisingActions. publishCampaign();
         merchandisingActions.verifySuccessMessage();
-        ThreadWait();
         Assert.assertNotNull(searchPage.queryRuleByName(page));
         queryRules.add(page);
 
@@ -163,7 +154,6 @@ public class browseVariantPinning extends MerchVTest {
         searchPage.threadWait();
         searchPage.queryRuleByName(page);
         searchPageActions.selectActionType(UnbxdEnum.EDIT, page);
-        ThreadWait();
         // Scroll to variant strategy summary
         variantLockAction.waitAndScrollToVariantStrategySummary();
         // Get the first product to verify UniqueId and VariantId
@@ -190,19 +180,15 @@ public class browseVariantPinning extends MerchVTest {
 
         System.out.println("UniqueId and VariantId verification passed");
         merchandisingActions.clickUsingJS(merchandisingActions.MerchandisingStrategyEditButton);
-        ThreadWait();
         // Scroll to footer button area (Apply variant lock button)
         variantLockAction.waitAndScrollToFooterButtonArea();
         variantLockAction.selectVariantPinningProduct(1);
-        ThreadWait();
         variantLockAction.selectVariantPinningPosition(1);
         merchandisingActions.clickOnApplyButton();
-        ThreadWait();
 
         searchPage.threadWait();
         merchandisingActions.publishCampaign();
         merchandisingActions.verifySuccessMessage();
-        ThreadWait();
 
         // Verify status in listing page (Active or Pending Sync)
         goTo(browsePage);
@@ -212,13 +198,11 @@ public class browseVariantPinning extends MerchVTest {
 
         // Verify status - check for Active first, then Pending Sync
         variantLockAction.verifyActiveOrPendingSyncStatus(page);
-
         goTo(browsePage);
         searchPage.threadWait();
         searchPage.queryRuleByName(page);
         searchPageActions.deleteQueryRule(page);
         searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-        searchPage.threadWait();
     }
 
 
@@ -230,21 +214,16 @@ public class browseVariantPinning extends MerchVTest {
         page = variantPinningJsonObject.get("query").getAsString()+System.currentTimeMillis();
 
         goTo(browsePage);
-        searchPage.threadWait();
         createPromotion(page,false,false);
         Map<String, Object> campaignData = merchandisingActions.getCampaignData("variantPinning.json");
 
         searchPageActions.pageRuleDropdown.click();
-        searchPageActions.threadWait();
         searchPageActions.awaitForElementPresence(searchPageActions.BuildPath);
         searchPageActions.BuildPath.click();
         searchPageActions.SelectedCategoryPathDisplay.fill().with(page);
-        searchPageActions.threadWait();
         searchPageActions.categorypathApplyButton.click();
         merchandisingActions.fillCampaignData(campaignData);
-        ThreadWait();
         merchandisingActions.goToLandingPage();
-        ThreadWait();
 
         // In preview: get product count, if > 0, click variant lock on first product, select first variant, and verify
         variantLockAction.waitForProductsToLoad();
@@ -254,7 +233,6 @@ public class browseVariantPinning extends MerchVTest {
 
         merchandisingActions.publishCampaign();
         merchandisingActions.verifySuccessMessage();
-        ThreadWait();
         Assert.assertNotNull(searchPage.queryRuleByName(page));
         queryRules.add(page);
 
@@ -262,7 +240,6 @@ public class browseVariantPinning extends MerchVTest {
         searchPage.threadWait();
         searchPage.queryRuleByName(page);
         searchPageActions.selectActionType(UnbxdEnum.EDIT, page);
-        ThreadWait();
 
         // Get the first product to verify UniqueId and VariantId
         FluentWebElement firstProduct = variantLockAction.getFirstProduct();
@@ -293,42 +270,30 @@ public class browseVariantPinning extends MerchVTest {
         // In preview: get product count, if > 0, click variant lock on first product, select first variant, and verify
         variantLockAction.waitForProductsToLoad();
         variantLockAction.selectLockAndVerifyFirstVariant(previewProductCount);
-        searchPage.threadWait();
         merchandisingActions.publishCampaign();
         merchandisingActions.verifySuccessMessage();
-        ThreadWait();
 
         // Verify status in listing page (Active or Pending Sync)
         goTo(browsePage);
-        searchPage.threadWait();
         searchPage.awaitForPageToLoad();
         searchPage.queryRuleByName(page);
         // Verify status - check for Active first, then Pending Sync
         variantLockAction.verifyActiveOrPendingSyncStatus(page);
-
         // Click on sync button and confirm
         variantLockAction.clickSyncButton();
-        ThreadWait();
-
         // Verify the sync info toast message
         searchPageActions.awaitTillElementDisplayed(searchPageActions.syncInfoToast);
         ThreadWait();
-
         // Refresh the page and verify syncing status
         variantLockAction.refreshAndCheckSyncingStatus();
-
         // Wait for and verify Variant Locking is displayed
-        ThreadWait();
-        variantLockAction.refreshPage();
         variantLockAction.waitSyncingNotToBeDisplayed(page);
         searchPageActions.awaitTillElementDisplayed(searchPageActions.variantLockingCampaignType);
-        ThreadWait();
+
 
         //Website Preview
         merchandisingActions.openPreviewAndSwitchTheTab();
         merchandisingActions.awaitForPageToLoad();
-        ThreadWait();
-        ThreadWait();
         String previewPage = driver.getCurrentUrl();
         //Assert.assertTrue(previewPage.contains("preview"),"Not redirecting to preview page");
         merchandisingActions.awaitForElementPresence(merchandisingActions.SearchpreviewOption);
@@ -337,14 +302,12 @@ public class browseVariantPinning extends MerchVTest {
 
         // Verify variant ID in first product matches preview variant ID
         variantLockAction.verifyFirstProductVariantIdMatchesPreview();
-        ThreadWait();
 
         goTo(browsePage);
         searchPage.threadWait();
         searchPage.queryRuleByName(page);
         searchPageActions.deleteQueryRule(page);
         searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-        searchPage.threadWait();
     }
 
     @FileToTest(value = "/consoleTestData/variantPinning.json")
@@ -355,21 +318,16 @@ public class browseVariantPinning extends MerchVTest {
         page = variantPinningJsonObject.get("query").getAsString()+System.currentTimeMillis();
 
         goTo(browsePage);
-        searchPage.threadWait();
         createPromotion(page,false,false);
         Map<String, Object> campaignData = merchandisingActions.getCampaignData("variantPinning.json");
 
         searchPageActions.pageRuleDropdown.click();
-        searchPageActions.threadWait();
         searchPageActions.awaitForElementPresence(searchPageActions.BuildPath);
         searchPageActions.BuildPath.click();
         searchPageActions.SelectedCategoryPathDisplay.fill().with(page);
-        searchPageActions.threadWait();
         searchPageActions.categorypathApplyButton.click();
         merchandisingActions.fillCampaignData(campaignData);
-        ThreadWait();
         merchandisingActions.goToLandingPage();
-        ThreadWait();
 
         // In preview: get product count, if > 0, click variant lock on first product, select first variant, and verify
         variantLockAction.waitForProductsToLoad();
@@ -379,12 +337,10 @@ public class browseVariantPinning extends MerchVTest {
 
         merchandisingActions.publishCampaign();
         merchandisingActions.verifySuccessMessage();
-        ThreadWait();
         Assert.assertNotNull(searchPage.queryRuleByName(page));
         queryRules.add(page);
 
         searchPageActions.selectActionType(UnbxdEnum.PREVIEW, page);
-        ThreadWait();
 
         // Get the first product to verify UniqueId and VariantId
         FluentWebElement firstProduct = variantLockAction.getFirstProduct();
@@ -410,7 +366,6 @@ public class browseVariantPinning extends MerchVTest {
         System.out.println("UniqueId and VariantId verification passed");
 
         goTo(browsePage);
-        searchPage.threadWait();
         searchPage.queryRuleByName(page);
 
         // Verify status - check for Active first, then Pending Sync
@@ -421,7 +376,6 @@ public class browseVariantPinning extends MerchVTest {
         searchPage.queryRuleByName(page);
         searchPageActions.deleteQueryRule(page);
         searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-        searchPage.threadWait();
     }
 
 
@@ -435,16 +389,13 @@ public class browseVariantPinning extends MerchVTest {
         int VariationB=ABData.get("VariationB").getAsInt();
 
         goTo(browsePage);
-        searchPage.threadWait();
         createPromotion(page,false,false);
         JsonArray object = ABData.get("data").getAsJsonArray();
         Map<String, Object> campaignData = merchandisingActions.getCampaignData("ABsearchBoost.json");
         searchPageActions.pageRuleDropdown.click();
-        searchPageActions.threadWait();
         searchPageActions.awaitForElementPresence(searchPageActions.BuildPath);
         searchPageActions.BuildPath.click();
         searchPageActions.SelectedCategoryPathDisplay.fill().with(page);
-        searchPageActions.threadWait();
         searchPageActions.categorypathApplyButton.click();
         merchandisingActions.fillCampaignData(campaignData);
         merchandisingActions.goToLandingPage();
@@ -484,7 +435,6 @@ public class browseVariantPinning extends MerchVTest {
 
         merchandisingActions.publishCampaign();
         merchandisingActions.verifySuccessMessage();
-        ThreadWait();
         Assert.assertNotNull(searchPage.queryRuleByName(page));
         pageRules.add(page);
 
@@ -493,7 +443,6 @@ public class browseVariantPinning extends MerchVTest {
         searchPage.threadWait();
         searchPage.queryRuleByName(page);
         searchPageActions.selectActionType(UnbxdEnum.PREVIEW, page);
-        ThreadWait();
 
         // Get the first product to verify UniqueId and VariantId
         FluentWebElement firstProduct = variantLockAction.getFirstProduct();
@@ -543,7 +492,6 @@ public class browseVariantPinning extends MerchVTest {
         System.out.println("UniqueId and VariantId verification passed");
 
         goTo(browsePage);
-        searchPage.threadWait();
         searchPage.queryRuleByName(page);
         // Verify status - check for Active first, then Pending Sync
         variantLockAction.verifyActiveOrPendingSyncStatus(page);
@@ -553,7 +501,6 @@ public class browseVariantPinning extends MerchVTest {
         searchPage.queryRuleByName(page);
         searchPageActions.deleteQueryRule(page);
         searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-        searchPage.threadWait();
     }
 }
 
