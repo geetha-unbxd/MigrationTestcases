@@ -1302,7 +1302,7 @@ public class VariantLockAction extends VariantPage {
 
                 // Use waitForLoaderToDisAppear with the locator and Config values
                 waitForLoaderToDisAppear(syncingStatusLocator, "syncing status", 1, waitTime);
-
+                ThreadWait();
                 // Verify syncing is actually gone
                 try {
                     FluentWebElement syncingElement = findFirst(".status-btn__variant");

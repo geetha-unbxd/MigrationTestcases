@@ -73,6 +73,7 @@ public class FieldPropertiesActions extends FieldPropertiesPage {
                 if (merchandisableCheckbox.isDisplayed()) {
                     awaitForElementPresence(merchandisableCheckbox);
                     ThreadWait();
+                    ThreadWait();
                     merchandisableCheckbox.click();
                     ThreadWait();
                 }
@@ -80,6 +81,7 @@ public class FieldPropertiesActions extends FieldPropertiesPage {
             case "Facetable":
                 if (facetableCheckbox != null && facetableCheckbox.isDisplayed()) {
                     awaitForElementPresence(facetableCheckbox);
+                    ThreadWait();
                     ThreadWait();
                     facetableCheckbox.click();
                     ThreadWait();
@@ -97,6 +99,7 @@ public class FieldPropertiesActions extends FieldPropertiesPage {
             case "Field Rule":
                 if (fieldRuleCheckbox != null && fieldRuleCheckbox.isDisplayed()) {
                     awaitForElementPresence(fieldRuleCheckbox);
+                    ThreadWait();
                     ThreadWait();
                     fieldRuleCheckbox.click();
                     ThreadWait();

@@ -227,10 +227,7 @@ public class searchVariantPinning extends MerchVTest {
         Assert.assertNotNull(searchPage.queryRuleByName(query));
         queryRules.add(query);
 
-        goTo(searchPage);
-        searchPage.queryRuleByName(query);
         searchPageActions.selectActionType(UnbxdEnum.EDIT, query);
-
         // Get the first product to verify UniqueId and VariantId
         FluentWebElement firstProduct = variantLockAction.getFirstProduct();
         // Scroll to variant strategy summary
@@ -266,9 +263,7 @@ public class searchVariantPinning extends MerchVTest {
         merchandisingActions.verifySuccessMessage();
 
         // Verify status in listing page (Active or Pending Sync)
-        goTo(searchPage);
-        searchPage.awaitForPageToLoad();
-        searchPage.queryRuleByName(query);
+
         // Verify status - check for Active first, then Pending Sync
         variantLockAction.verifyActiveOrPendingSyncStatus(query);
 
@@ -291,7 +286,6 @@ public class searchVariantPinning extends MerchVTest {
         String previewPage = driver.getCurrentUrl();
         //Assert.assertTrue(previewPage.contains("preview"),"Not redirecting to preview page");
         merchandisingActions.awaitForElementPresence(merchandisingActions.SearchpreviewOption);
-        ThreadWait();
         Assert.assertTrue(merchandisingActions.showingResultinPreview.getText().contains(query));
         // Verify variant ID in first product matches preview variant ID
         variantLockAction.verifyFirstProductVariantIdMatchesPreview();
