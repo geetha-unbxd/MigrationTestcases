@@ -1281,7 +1281,7 @@ public class VariantLockAction extends VariantPage {
      */
     public void waitSyncingNotToBeDisplayed(String query) throws InterruptedException {
         awaitForPageToLoad();
-        Thread.sleep(17000);
+        Thread.sleep(18000);
         refreshPage();
         ThreadWait();
 
