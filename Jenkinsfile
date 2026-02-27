@@ -4,7 +4,6 @@ pipeline {
         SELENIUM_GRID_URL = 'http://selenium-hub.netcorein.com:4444/wd/hub'
     }
     tools { maven 'M3' }
-
     parameters {
         choice(
             name: 'ENV',
@@ -22,25 +21,21 @@ pipeline {
             description: 'Trigger downstream jobs automatically'
         )
     }
-
     stages {
         stage('Build') {
             steps { sh 'mvn clean compile' }
         }
-
         stage('Grid Health Check') {
             steps {
                 script {
                     echo "Checking Selenium Grid health..."
                     def statusOutput = sh(script: "curl -s --connect-timeout 10 --max-time 30 ${SELENIUM_GRID_URL}/status | head -20", returnStdout: true).trim()
                     if (statusOutput.contains('"ready": true')) echo "✅ Selenium Grid is accessible" else echo "⚠️ Grid may not be ready"
-
                     def chromeCheck = sh(script: "curl -s --connect-timeout 10 --max-time 30 ${SELENIUM_GRID_URL}/grid/api/hub | grep -o '\"browserName\":\"chrome\"' | wc -l", returnStdout: true).trim()
                     if (chromeCheck != "0") echo "✅ Chrome available on Grid" else echo "⚠️ No Chrome found"
                 }
             }
         }
-
         stage('Test') {
             steps {
                 echo "Running tests on ENV: ${params.ENV} | Suite: ${params.SUITE_FILE}"
@@ -51,7 +46,6 @@ pipeline {
                         returnStatus: true
                     )
                     if (mvnStatus != 0) currentBuild.result = 'FAILURE'
-
                     def sourcePath = fileExists('extent.html') ? 'extent.html' :
                                      fileExists('test-output/ExtentReport.html') ? 'test-output/ExtentReport.html' : ''
                     env.EXTENT_REPORT_PATH = 'Extent_Report/index.html'
@@ -64,7 +58,6 @@ pipeline {
             }
         }
     }
-
     post {
         always {
             junit '**/target/surefire-reports/*.xml'
@@ -77,91 +70,51 @@ pipeline {
                 reportFiles: 'index.html',
                 reportName: 'Extent Report'
             ])
-        }
-
-        success {
-            slackSend(
-                channel: '#qa-automation-reports',
-                color: 'good',
-                message: """🎉 *${env.JOB_NAME.toUpperCase()} SUCCESS* 🎉
-🏗️ Job: ${env.JOB_NAME}
-🔢 Build: #${env.BUILD_NUMBER}
-⏰ Duration: ${currentBuild.durationString}
-🌍 ENV: ${params.ENV}
-📋 Suite: ${params.SUITE_FILE}
-🔗 <${env.BUILD_URL}|View Build>"""
-            )
-
             // -----------------------------
             // Downstream Jobs Trigger Logic
             // -----------------------------
             script {
                 if (params.TRIGGER_NEXT) {
-                    // ========================
-                    // Job-1 -> Job-2 & Job-3
-                    // ========================
-                    if (params.SUITE_FILE.contains('MerchandizingTestcases.xml')) {
-                        echo "Triggering Job-2 (Project 2) after Job-1"
-                        build job: 'Project2/website-preview-automation',
-                              parameters: [
-                                  string(name: 'ENV', value: params.ENV),
-                                  string(name: 'SUITE_FILE', value: 'src/test/resources/testNG/WebsitePreviewSuite.xml'),
-                                  booleanParam(name: 'TRIGGER_NEXT', value: false)
-                              ],
-                              wait: true
-
-                        echo "Triggering Job-3 (Project 3) after Job-1"
-                        build job: 'Project3/FTU_Selfserve',
-                              parameters: [
-                                  string(name: 'ENV', value: params.ENV),
-                                  string(name: 'SUITE_FILE', value: 'src/test/resources/testNG/FTU_Selfserve.xml'),
-                                  booleanParam(name: 'TRIGGER_NEXT', value: false)
-                              ],
-                              wait: true
-                    }
-
-                    // ========================
-                    // Job-4 -> Job-5
-                    // ========================
-                    else if (params.SUITE_FILE.contains('ManageTestcases.xml')) {
-                        echo "Triggering Job-5 (Project 1) after Job-4"
-                        build job: 'SS_BulkUploadTest',
-                              parameters: [
-                                  string(name: 'ENV', value: params.ENV),
-                                  string(name: 'SUITE_FILE', value: 'src/test/resources/testNG/SS_BulkUploadTest.xml'),
-                                  booleanParam(name: 'TRIGGER_NEXT', value: false)
-                              ],
-                              wait: true
+                    echo "Auto-trigger enabled. Triggering downstream jobs..."
+                    try {
+                        // Job 1 -> Job 2 & Job 3
+                        if (env.JOB_NAME == 'merchandisingNew') {
+                            build job: 'website-preview-automation',
+                                  parameters: [string(name: 'ENV', value: params.ENV), booleanParam(name: 'TRIGGER_NEXT', value: false)],
+                                  wait: false,
+                                  propagate: false
+                            build job: 'FTU_Selfserve',
+                                  parameters: [string(name: 'ENV', value: params.ENV), booleanParam(name: 'TRIGGER_NEXT', value: false)],
+                                  wait: false,
+                                  propagate: false
+                        }
+                        // Job 4 -> Job 5
+                        else if (env.JOB_NAME == 'selfServe_manage_testcases') {
+                            build job: 'SS_BulkUploadTest',
+                                  parameters: [string(name: 'ENV', value: params.ENV), booleanParam(name: 'TRIGGER_NEXT', value: false)],
+                                  wait: false,
+                                  propagate: false
+                        }
+                    } catch (err) {
+                        echo "Downstream trigger error: ${err}"
                     }
                 }
+
+                // -----------------------------
+                // Slack Notifications (Always)
+                // -----------------------------
+                def colorMap = ['SUCCESS':'good','FAILURE':'danger','UNSTABLE':'warning','ABORTED':'warning']
+                slackSend(
+                    channel: '#qa-automation-reports',
+                    color: colorMap[currentBuild.currentResult],
+                    message: """🔔 *${env.JOB_NAME.toUpperCase()} ${currentBuild.currentResult}*
+🏗️ Job: ${env.JOB_NAME}
+🔢 Build: #${env.BUILD_NUMBER}
+🌍 ENV: ${params.ENV}
+📋 Suite: ${params.SUITE_FILE}
+🔗 <${env.BUILD_URL}|View Build>"""
+                )
             }
-        }
-
-        failure {
-            slackSend(
-                channel: '#qa-automation-reports',
-                color: 'danger',
-                message: """💥 *${env.JOB_NAME.toUpperCase()} FAILED* 💥
-🏗️ Job: ${env.JOB_NAME}
-🔢 Build: #${env.BUILD_NUMBER}
-⏰ Duration: ${currentBuild.durationString}
-🌍 ENV: ${params.ENV}
-📋 Suite: ${params.SUITE_FILE}
-🔗 <${env.BUILD_URL}|View Build>"""
-            )
-        }
-
-        aborted {
-            slackSend(
-                channel: '#qa-automation-reports',
-                color: 'warning',
-                message: """⏸️ *${env.JOB_NAME.toUpperCase()} ABORTED* ⏸️
-🏗️ Job: ${env.JOB_NAME}
-🔢 Build: #${env.BUILD_NUMBER}
-🌍 ENV: ${params.ENV}
-📋 Suite: ${params.SUITE_FILE}
-🔗 <${env.BUILD_URL}|View Build>"""
-            )
         }
     }
 }
