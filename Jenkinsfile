@@ -77,33 +77,6 @@ pipeline {
 📦 <${env.BUILD_URL}artifact/Extent_Report.zip|Download Full Extent Report ZIP>
 📋 <${env.BUILD_URL}testngreports/|View TestNG Report>"""
             )
-            // Trigger downstream jobs even if this build eventually failed
-            script {
-                if (params.TRIGGER_NEXT) {
-                    try {
-                        // Job 1 -> Job 2 & Job 3
-                        if (env.JOB_NAME == 'merchandisingNew') {
-                            build job: 'website-preview-automation',
-                                  parameters: [string(name: 'ENV', value: params.ENV), booleanParam(name: 'TRIGGER_NEXT', value: false)],
-                                  wait: false,
-                                  propagate: false
-                            build job: 'FTU_Selfserve',
-                                  parameters: [string(name: 'ENV', value: params.ENV), booleanParam(name: 'TRIGGER_NEXT', value: false)],
-                                  wait: false,
-                                  propagate: false
-                        }
-                        // Job 4 -> Job 5
-                        else if (env.JOB_NAME == 'selfServe_manage_testcases') {
-                            build job: 'SS_BulkUploadTest',
-                                  parameters: [string(name: 'ENV', value: params.ENV), booleanParam(name: 'TRIGGER_NEXT', value: false)],
-                                  wait: false,
-                                  propagate: false
-                        }
-                    } catch (err) {
-                        echo "Downstream trigger error: ${err}"
-                    }
-                }
-            }
         }
         failure {
             slackSend(
@@ -157,6 +130,36 @@ pipeline {
                 reportFiles: 'index.html',
                 reportName: 'Extent Report'
             ])
+            
+            // -----------------------------
+            // Downstream Jobs Trigger Logic (runs regardless of build result)
+            // -----------------------------
+            script {
+                if (params.TRIGGER_NEXT) {
+                    try {
+                        // Job 1 -> Job 2 & Job 3
+                        if (env.JOB_NAME == 'merchandisingNew') {
+                            build job: 'website-preview-automation',
+                                  parameters: [string(name: 'ENV', value: params.ENV), booleanParam(name: 'TRIGGER_NEXT', value: false)],
+                                  wait: false,
+                                  propagate: false
+                            build job: 'FTU_Selfserve',
+                                  parameters: [string(name: 'ENV', value: params.ENV), booleanParam(name: 'TRIGGER_NEXT', value: false)],
+                                  wait: false,
+                                  propagate: false
+                        }
+                        // Job 4 -> Job 5
+                        else if (env.JOB_NAME == 'selfServe_manage_testcases') {
+                            build job: 'SS_BulkUploadTest',
+                                  parameters: [string(name: 'ENV', value: params.ENV), booleanParam(name: 'TRIGGER_NEXT', value: false)],
+                                  wait: false,
+                                  propagate: false
+                        }
+                    } catch (err) {
+                        echo "Downstream trigger error: ${err}"
+                    }
+                }
+            }
         }
     }
 }
