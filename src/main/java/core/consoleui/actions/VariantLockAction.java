@@ -1,15 +1,15 @@
 package core.consoleui.actions;
 
-import core.consoleui.page.MerchandisingRulesPage;
-import core.consoleui.page.VariantPage;
-import lib.Config;
-import lib.compat.Page;
-import lib.compat.FluentList;
-import lib.compat.FluentWebElement;
 import org.openqa.selenium.By;
 import org.testng.Assert;
 
+import core.consoleui.page.MerchandisingRulesPage;
+import core.consoleui.page.VariantPage;
 import static core.ui.page.UiBase.ThreadWait;
+import lib.Config;
+import lib.compat.FluentList;
+import lib.compat.FluentWebElement;
+import lib.compat.Page;
 
 public class VariantLockAction extends VariantPage {
 
@@ -1281,7 +1281,7 @@ public class VariantLockAction extends VariantPage {
      */
     public void waitSyncingNotToBeDisplayed(String query) throws InterruptedException {
         awaitForPageToLoad();
-        Thread.sleep(18000);
+        Thread.sleep(20000);
         refreshPage();
         ThreadWait();
 
