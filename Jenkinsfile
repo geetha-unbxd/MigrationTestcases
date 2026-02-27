@@ -22,9 +22,7 @@ pipeline {
         )
     }
     stages {
-        stage('Build') {
-            steps { sh 'mvn clean compile' }
-        }
+        stage('Build') { steps { sh 'mvn clean compile' } }
         stage('Grid Health Check') {
             steps {
                 script {
@@ -59,23 +57,29 @@ pipeline {
         }
     }
     post {
-        always {
-            junit '**/target/surefire-reports/*.xml'
-            archiveArtifacts artifacts: 'Extent_Report/index.html,Extent_Report.zip', onlyIfSuccessful: false
-            publishHTML(target: [
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'Extent_Report',
-                reportFiles: 'index.html',
-                reportName: 'Extent Report'
-            ])
-            // -----------------------------
-            // Downstream Jobs Trigger Logic
-            // -----------------------------
+        success {
+            slackSend(
+                channel: '#qa-automation-reports',
+                color: 'good',
+                tokenCredentialId: 'slackID',
+                teamDomain: 'unbxd',
+                botUser: true,
+                message: """🎉 *${env.JOB_NAME.toUpperCase()} SUCCESS* 🎉
+🏗️ **Job**: ${env.JOB_NAME}
+🔢 **Build**: #${env.BUILD_NUMBER}
+⏰ **Duration**: ${currentBuild.durationString}
+🌍 **Environment**: ${params.ENV}
+🌿 **Branch**: ${env.BRANCH_NAME ?: 'origin/main'}
+🚀 **Build Cause**: 🤖 Manual Trigger
+🔗 <${env.BUILD_URL}|View Build>
+📊 <${env.BUILD_URL}Extent_Report/|View Reports>
+📦 <${env.BUILD_URL}artifact/${env.EXTENT_REPORT_PATH}|View Extent HTML Report Artifact>
+📦 <${env.BUILD_URL}artifact/Extent_Report.zip|Download Full Extent Report ZIP>
+📋 <${env.BUILD_URL}testngreports/|View TestNG Report>"""
+            )
+            // Trigger downstream jobs even if this build eventually failed
             script {
                 if (params.TRIGGER_NEXT) {
-                    echo "Auto-trigger enabled. Triggering downstream jobs..."
                     try {
                         // Job 1 -> Job 2 & Job 3
                         if (env.JOB_NAME == 'merchandisingNew') {
@@ -99,22 +103,60 @@ pipeline {
                         echo "Downstream trigger error: ${err}"
                     }
                 }
-
-                // -----------------------------
-                // Slack Notifications (Always)
-                // -----------------------------
-                def colorMap = ['SUCCESS':'good','FAILURE':'danger','UNSTABLE':'warning','ABORTED':'warning']
-                slackSend(
-                    channel: '#qa-automation-reports',
-                    color: colorMap[currentBuild.currentResult],
-                    message: """🔔 *${env.JOB_NAME.toUpperCase()} ${currentBuild.currentResult}*
-🏗️ Job: ${env.JOB_NAME}
-🔢 Build: #${env.BUILD_NUMBER}
-🌍 ENV: ${params.ENV}
-📋 Suite: ${params.SUITE_FILE}
-🔗 <${env.BUILD_URL}|View Build>"""
-                )
             }
+        }
+        failure {
+            slackSend(
+                channel: '#qa-automation-reports',
+                color: 'danger',
+                tokenCredentialId: 'slackID',
+                teamDomain: 'unbxd',
+                botUser: true,
+                message: """💥 *${env.JOB_NAME.toUpperCase()} FAILED* 💥
+🏗️ **Job**: ${env.JOB_NAME}
+🔢 **Build**: #${env.BUILD_NUMBER}
+⏰ **Duration**: ${currentBuild.durationString}
+🌍 **Environment**: ${params.ENV}
+🌿 **Branch**: ${env.BRANCH_NAME ?: 'origin/main'}
+🚀 **Build Cause**: 🤖 Manual Trigger
+🔗 <${env.BUILD_URL}|View Build>
+📊 <${env.BUILD_URL}Extent_Report/|View Reports>
+📦 <${env.BUILD_URL}artifact/${env.EXTENT_REPORT_PATH}|View Extent HTML Report Artifact>
+📦 <${env.BUILD_URL}artifact/Extent_Report.zip|Download Full Extent Report ZIP>
+📋 <${env.BUILD_URL}testngreports/|View TestNG Report>"""
+            )
+        }
+        aborted {
+            slackSend(
+                channel: '#qa-automation-reports',
+                color: 'warning',
+                tokenCredentialId: 'slackID',
+                teamDomain: 'unbxd',
+                botUser: true,
+                message: """⏸️ *${env.JOB_NAME.toUpperCase()} ABORTED* ⏸️
+🏗️ **Job**: ${env.JOB_NAME}
+🔢 **Build**: #${env.BUILD_NUMBER}
+🌍 **Environment**: ${params.ENV}
+🌿 **Branch**: ${env.BRANCH_NAME ?: 'origin/main'}
+🚀 **Build Cause**: 🤖 Manual Trigger
+🔗 <${env.BUILD_URL}|View Build>
+📊 <${env.BUILD_URL}Extent_Report/|View Reports>
+📦 <${env.BUILD_URL}artifact/${env.EXTENT_REPORT_PATH}|View Extent HTML Report Artifact>
+📦 <${env.BUILD_URL}artifact/Extent_Report.zip|Download Full Extent Report ZIP>
+📋 <${env.BUILD_URL}testngreports/|View TestNG Report>"""
+            )
+        }
+        always {
+            junit '**/target/surefire-reports/*.xml'
+            archiveArtifacts artifacts: 'Extent_Report/index.html,Extent_Report.zip', onlyIfSuccessful: false
+            publishHTML(target: [
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'Extent_Report',
+                reportFiles: 'index.html',
+                reportName: 'Extent Report'
+            ])
         }
     }
 }
