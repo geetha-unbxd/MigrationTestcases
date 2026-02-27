@@ -6,9 +6,21 @@ pipeline {
     tools { maven 'M3' }
 
     parameters {
-        string(name: 'ENV', defaultValue: 'Dev', description: 'Environment/Region to run')
-        string(name: 'SUITE_FILE', defaultValue: 'src/test/resources/testNG/MerchandizingTestcases.xml', description: 'Suite XML to run')
-        booleanParam(name: 'TRIGGER_NEXT', defaultValue: false, description: 'Trigger downstream jobs automatically')
+        choice(
+            name: 'ENV',
+            choices: ['Dev', 'ProdANZ', 'ProdGANZ', 'ProdAPAC', 'ProdGCP', 'ProdUK', 'ProdUS'],
+            description: 'Select Region'
+        )
+        string(
+            name: 'SUITE_FILE',
+            defaultValue: 'src/test/resources/testNG/MerchandizingTestcases.xml',
+            description: 'Suite XML to run'
+        )
+        booleanParam(
+            name: 'TRIGGER_NEXT',
+            defaultValue: false,
+            description: 'Trigger downstream jobs automatically'
+        )
     }
 
     stages {
