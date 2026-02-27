@@ -3,163 +3,57 @@ pipeline {
     environment {
         SELENIUM_GRID_URL = 'http://selenium-hub.netcorein.com:4444/wd/hub'
     }
+    tools { maven 'M3' }
 
-    tools {
-        maven 'M3'
+    parameters {
+        string(name: 'ENV', defaultValue: 'Dev', description: 'Environment/Region to run')
+        string(name: 'SUITE_FILE', defaultValue: 'src/test/resources/testNG/MerchandizingTestcases.xml', description: 'Suite XML to run')
+        booleanParam(name: 'TRIGGER_NEXT', defaultValue: false, description: 'Trigger downstream jobs automatically')
     }
 
     stages {
         stage('Build') {
-            steps {
-                sh 'mvn clean compile'
-            }
+            steps { sh 'mvn clean compile' }
         }
 
         stage('Grid Health Check') {
             steps {
                 script {
                     echo "Checking Selenium Grid health..."
-                    def statusOutput = sh(
-                        script: "curl -s --connect-timeout 10 --max-time 30 http://selenium-hub.netcorein.com:4444/status | head -20",
-                        returnStdout: true
-                    ).trim()
-                    
-                    if (statusOutput.contains('"ready": true')) {
-                        echo "✅ Selenium Grid is accessible"
-                    } else {
-                        echo "⚠️ Selenium Grid may not be ready"
-                    }
-                    
-                    // Check for Chrome browsers available
-                    def chromeCheck = sh(
-                        script: "curl -s --connect-timeout 10 --max-time 30 http://selenium-hub.netcorein.com:4444/grid/api/hub | grep -o '\"browserName\":\"chrome\"' | wc -l",
-                        returnStdout: true
-                    ).trim()
-                    
-                    if (chromeCheck != "0") {
-                        echo "✅ Chrome browsers available on Grid"
-                    } else {
-                        echo "⚠️ No Chrome browsers found on Grid"
-                    }
+                    def statusOutput = sh(script: "curl -s --connect-timeout 10 --max-time 30 ${SELENIUM_GRID_URL}/status | head -20", returnStdout: true).trim()
+                    if (statusOutput.contains('"ready": true')) echo "✅ Selenium Grid is accessible" else echo "⚠️ Grid may not be ready"
+
+                    def chromeCheck = sh(script: "curl -s --connect-timeout 10 --max-time 30 ${SELENIUM_GRID_URL}/grid/api/hub | grep -o '\"browserName\":\"chrome\"' | wc -l", returnStdout: true).trim()
+                    if (chromeCheck != "0") echo "✅ Chrome available on Grid" else echo "⚠️ No Chrome found"
                 }
             }
         }
 
         stage('Test') {
             steps {
-                echo "Running tests on ENV: ${params.ENV}"
-                echo "Suite File: ${params.SUITE_FILE}"
-                echo "Using Selenium Grid URL: ${SELENIUM_GRID_URL}"
-                // Ensure we don't reuse an old report folder
+                echo "Running tests on ENV: ${params.ENV} | Suite: ${params.SUITE_FILE}"
                 sh 'rm -rf Extent_Report Extent_Report.zip || true'
                 script {
-                    // Run Maven but continue even if it fails so we can always produce artifacts
                     int mvnStatus = sh(
                         script: "mvn clean test -P${params.ENV} -Denv.profile=${params.ENV} -DhubUrl=${SELENIUM_GRID_URL} -DsuiteXmlFile=${params.SUITE_FILE} -Dlistener=core.reporting.ExtentTestNGITestListener,core.AnnotationTransformer",
                         returnStatus: true
                     )
-                    if (mvnStatus != 0) {
-                        echo "Maven exited with status ${mvnStatus}. Marking build as FAILURE but continuing to generate artifacts."
-                        currentBuild.result = 'FAILURE'
-                    }
+                    if (mvnStatus != 0) currentBuild.result = 'FAILURE'
 
-                    // Try common paths first
-                    def sourcePath = ''
-                    if (fileExists('extent.html')) {
-                        sourcePath = 'extent.html'
-                    } else if (fileExists('test-output/ExtentReport.html')) {
-                        sourcePath = 'test-output/ExtentReport.html'
-                    } else {
-                        // Fallback: search workspace for any likely extent report
-                        def found = sh(script: """bash -lc 'find . -maxdepth 6 -type f ( -name "extent.html" -o -name "ExtentReport.html" -o -name "Extent*.html" ) | head -n 1'""", returnStdout: true).trim()
-                        if (found) {
-                            sourcePath = found
-                        }
-                    }
-
-                    // Normalize to a single artifact path
+                    def sourcePath = fileExists('extent.html') ? 'extent.html' :
+                                     fileExists('test-output/ExtentReport.html') ? 'test-output/ExtentReport.html' : ''
                     env.EXTENT_REPORT_PATH = 'Extent_Report/index.html'
                     if (sourcePath) {
                         sh "mkdir -p Extent_Report && cp \"${sourcePath}\" Extent_Report/index.html && zip -r Extent_Report.zip Extent_Report || true"
                     } else {
-                        sh "mkdir -p Extent_Report && echo '<html><body><h2>No Extent report was produced for build #${env.BUILD_NUMBER}</h2></body></html>' > Extent_Report/index.html && zip -r Extent_Report.zip Extent_Report || true"
+                        sh "mkdir -p Extent_Report && echo '<html><body><h2>No Extent report produced for build #${env.BUILD_NUMBER}</h2></body></html>' > Extent_Report/index.html && zip -r Extent_Report.zip Extent_Report || true"
                     }
-                    echo "Using Extent report artifact: ${env.EXTENT_REPORT_PATH} (source: ${sourcePath ?: 'none'})"
                 }
             }
         }
     }
 
     post {
-        success {
-            slackSend(
-                channel: '#qa-automation-reports',
-                color: 'good',
-                message: """🎉 *${env.JOB_NAME.toUpperCase()} SUCCESS* 🎉
-
-🏗️ **Job**: ${env.JOB_NAME}
-🔢 **Build**: #${env.BUILD_NUMBER}
-⏰ **Duration**: ${currentBuild.durationString}
-🌍 **Environment**: ${params.ENV}
-🌿 **Branch**: ${env.BRANCH_NAME ?: 'origin/main'}
-🚀 **Build Cause**: 🤖 Manual Trigger
-
-🔗 <${env.BUILD_URL}|View Build>
-📊 <${env.BUILD_URL}Extent_Report/|View Reports>
-📦 <${env.BUILD_URL}artifact/${env.EXTENT_REPORT_PATH}|View Extent HTML Report Artifact>
-📦 <${env.BUILD_URL}artifact/Extent_Report.zip|Download Full Extent Report ZIP>
-📋 <${env.BUILD_URL}testngreports/|View TestNG Report>""",
-                tokenCredentialId: 'slackID',
-                teamDomain: 'unbxd',
-                botUser: true
-            )
-        }
-        failure {
-            slackSend(
-                channel: '#qa-automation-reports',
-                color: 'danger',
-                message: """💥 *${env.JOB_NAME.toUpperCase()} FAILED* 💥
-
-🏗️ **Job**: ${env.JOB_NAME}
-🔢 **Build**: #${env.BUILD_NUMBER}
-⏰ **Duration**: ${currentBuild.durationString}
-🌍 **Environment**: ${params.ENV}
-🌿 **Branch**: ${env.BRANCH_NAME ?: 'origin/main'}
-🚀 **Build Cause**: 🤖 Manual Trigger
-
-🔗 <${env.BUILD_URL}|View Build>
-📊 <${env.BUILD_URL}Extent_Report/|View Reports>
-📦 <${env.BUILD_URL}artifact/${env.EXTENT_REPORT_PATH}|View Extent HTML Report Artifact>
-📦 <${env.BUILD_URL}artifact/Extent_Report.zip|Download Full Extent Report ZIP>
-📋 <${env.BUILD_URL}testngreports/|View TestNG Report>""",
-                tokenCredentialId: 'slackID',
-                teamDomain: 'unbxd',
-                botUser: true
-            )
-        }
-        aborted {
-            slackSend(
-                channel: '#qa-automation-reports',
-                color: 'warning',
-                message: """⏸️ *${env.JOB_NAME.toUpperCase()} ABORTED* ⏸️
-
-🏗️ **Job**: ${env.JOB_NAME}
-🔢 **Build**: #${env.BUILD_NUMBER}
-🌍 **Environment**: ${params.ENV}
-🌿 **Branch**: ${env.BRANCH_NAME ?: 'origin/main'}
-🚀 **Build Cause**: 🤖 Manual Trigger
-
-🔗 <${env.BUILD_URL}|View Build>
-📊 <${env.BUILD_URL}Extent_Report/|View Reports>
-📦 <${env.BUILD_URL}artifact/${env.EXTENT_REPORT_PATH}|View Extent HTML Report Artifact>
-📦 <${env.BUILD_URL}artifact/Extent_Report.zip|Download Full Extent Report ZIP>
-📋 <${env.BUILD_URL}testngreports/|View TestNG Report>""",
-                tokenCredentialId: 'slackID',
-                teamDomain: 'unbxd',
-                botUser: true
-            )
-        }
-        
         always {
             junit '**/target/surefire-reports/*.xml'
             archiveArtifacts artifacts: 'Extent_Report/index.html,Extent_Report.zip', onlyIfSuccessful: false
@@ -171,6 +65,91 @@ pipeline {
                 reportFiles: 'index.html',
                 reportName: 'Extent Report'
             ])
+        }
+
+        success {
+            slackSend(
+                channel: '#qa-automation-reports',
+                color: 'good',
+                message: """🎉 *${env.JOB_NAME.toUpperCase()} SUCCESS* 🎉
+🏗️ Job: ${env.JOB_NAME}
+🔢 Build: #${env.BUILD_NUMBER}
+⏰ Duration: ${currentBuild.durationString}
+🌍 ENV: ${params.ENV}
+📋 Suite: ${params.SUITE_FILE}
+🔗 <${env.BUILD_URL}|View Build>"""
+            )
+
+            // -----------------------------
+            // Downstream Jobs Trigger Logic
+            // -----------------------------
+            script {
+                if (params.TRIGGER_NEXT) {
+                    // ========================
+                    // Job-1 -> Job-2 & Job-3
+                    // ========================
+                    if (params.SUITE_FILE.contains('MerchandizingTestcases.xml')) {
+                        echo "Triggering Job-2 (Project 2) after Job-1"
+                        build job: 'Project2/website-preview-automation',
+                              parameters: [
+                                  string(name: 'ENV', value: params.ENV),
+                                  string(name: 'SUITE_FILE', value: 'src/test/resources/testNG/WebsitePreviewSuite.xml'),
+                                  booleanParam(name: 'TRIGGER_NEXT', value: false)
+                              ],
+                              wait: true
+
+                        echo "Triggering Job-3 (Project 3) after Job-1"
+                        build job: 'Project3/FTU_Selfserve',
+                              parameters: [
+                                  string(name: 'ENV', value: params.ENV),
+                                  string(name: 'SUITE_FILE', value: 'src/test/resources/testNG/FTU_Selfserve.xml'),
+                                  booleanParam(name: 'TRIGGER_NEXT', value: false)
+                              ],
+                              wait: true
+                    }
+
+                    // ========================
+                    // Job-4 -> Job-5
+                    // ========================
+                    else if (params.SUITE_FILE.contains('ManageTestcases.xml')) {
+                        echo "Triggering Job-5 (Project 1) after Job-4"
+                        build job: 'SS_BulkUploadTest',
+                              parameters: [
+                                  string(name: 'ENV', value: params.ENV),
+                                  string(name: 'SUITE_FILE', value: 'src/test/resources/testNG/SS_BulkUploadTest.xml'),
+                                  booleanParam(name: 'TRIGGER_NEXT', value: false)
+                              ],
+                              wait: true
+                    }
+                }
+            }
+        }
+
+        failure {
+            slackSend(
+                channel: '#qa-automation-reports',
+                color: 'danger',
+                message: """💥 *${env.JOB_NAME.toUpperCase()} FAILED* 💥
+🏗️ Job: ${env.JOB_NAME}
+🔢 Build: #${env.BUILD_NUMBER}
+⏰ Duration: ${currentBuild.durationString}
+🌍 ENV: ${params.ENV}
+📋 Suite: ${params.SUITE_FILE}
+🔗 <${env.BUILD_URL}|View Build>"""
+            )
+        }
+
+        aborted {
+            slackSend(
+                channel: '#qa-automation-reports',
+                color: 'warning',
+                message: """⏸️ *${env.JOB_NAME.toUpperCase()} ABORTED* ⏸️
+🏗️ Job: ${env.JOB_NAME}
+🔢 Build: #${env.BUILD_NUMBER}
+🌍 ENV: ${params.ENV}
+📋 Suite: ${params.SUITE_FILE}
+🔗 <${env.BUILD_URL}|View Build>"""
+            )
         }
     }
 }
