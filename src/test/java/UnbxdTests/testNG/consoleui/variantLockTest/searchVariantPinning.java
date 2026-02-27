@@ -150,8 +150,6 @@ public class searchVariantPinning extends MerchVTest {
         Assert.assertNotNull(searchPage.queryRuleByName(query));
         queryRules.add(query);
 
-        goTo(searchPage);
-        searchPage.queryRuleByName(query);
         searchPageActions.selectActionType(UnbxdEnum.EDIT, query);
         // Scroll to variant strategy summary
         variantLockAction.waitAndScrollToVariantStrategySummary();
@@ -194,8 +192,6 @@ public class searchVariantPinning extends MerchVTest {
 
         // Verify status - check for Active first, then Pending Sync
         variantLockAction.verifyActiveOrPendingSyncStatus(query);
-        goTo(searchPage);
-        searchPage.queryRuleByName(query);
         searchPageActions.deleteQueryRule(query);
         searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
     }
@@ -252,7 +248,6 @@ public class searchVariantPinning extends MerchVTest {
         Assert.assertFalse(summaryVariantId.isEmpty(), "VariantId not found in summary");
         Assert.assertFalse(previewVariantId.isEmpty(), "VariantId not found in preview");
         Assert.assertEquals(previewVariantId, summaryVariantId, "VariantId mismatch between summary and preview");
-
         System.out.println("UniqueId and VariantId verification passed");
 
 
@@ -266,7 +261,6 @@ public class searchVariantPinning extends MerchVTest {
 
         // Verify status - check for Active first, then Pending Sync
         variantLockAction.verifyActiveOrPendingSyncStatus(query);
-
         variantLockAction.clickSyncButton();
         ThreadWait();
         // Verify the sync info toast message
@@ -276,7 +270,6 @@ public class searchVariantPinning extends MerchVTest {
         variantLockAction.refreshAndCheckSyncingStatus();
         // Wait for syncing to disappear; once syncing is gone, proceed to next step
         variantLockAction.waitSyncingNotToBeDisplayed(query);
-        System.out.println("Syncing went gone - proceeding to next step");
         // Next step: wait for Variant Locking campaign type to be displayed
         searchPageActions.awaitTillElementDisplayed(searchPageActions.variantLockingCampaignType);
 
@@ -352,8 +345,6 @@ public class searchVariantPinning extends MerchVTest {
         // Verify status - check for Active first, then Pending Sync
         variantLockAction.verifyActiveOrPendingSyncStatus(query);
 
-        goTo(searchPage);
-        searchPage.queryRuleByName(query);
         searchPageActions.deleteQueryRule(query);
         searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
 
@@ -411,9 +402,6 @@ public class searchVariantPinning extends MerchVTest {
         Assert.assertNotNull(searchPage.queryRuleByName(query));
         pageRules.add(query);
 
-
-        goTo(searchPage);
-        searchPage.queryRuleByName(query);
         searchPageActions.selectActionType(UnbxdEnum.PREVIEW, query);
 
         // Get the first product to verify UniqueId and VariantId
@@ -467,9 +455,7 @@ public class searchVariantPinning extends MerchVTest {
         searchPage.queryRuleByName(query);
         // Verify status - check for Active first, then Pending Sync
         variantLockAction.verifyActiveOrPendingSyncStatus(query);
-        
-        goTo(searchPage);
-        searchPage.queryRuleByName(query);
+
         searchPageActions.deleteQueryRule(query);
         searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
     }

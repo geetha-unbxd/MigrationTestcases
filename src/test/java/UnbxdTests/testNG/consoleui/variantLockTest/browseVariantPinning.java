@@ -150,9 +150,6 @@ public class browseVariantPinning extends MerchVTest {
         Assert.assertNotNull(searchPage.queryRuleByName(page));
         queryRules.add(page);
 
-        goTo(browsePage);
-        searchPage.threadWait();
-        searchPage.queryRuleByName(page);
         searchPageActions.selectActionType(UnbxdEnum.EDIT, page);
         // Scroll to variant strategy summary
         variantLockAction.waitAndScrollToVariantStrategySummary();
@@ -189,18 +186,12 @@ public class browseVariantPinning extends MerchVTest {
         searchPage.threadWait();
         merchandisingActions.publishCampaign();
         merchandisingActions.verifySuccessMessage();
-
-        // Verify status in listing page (Active or Pending Sync)
         goTo(browsePage);
         searchPage.threadWait();
-        searchPage.awaitForPageToLoad();
         searchPage.queryRuleByName(page);
-
+        // Verify status in listing page (Active or Pending Sync)
         // Verify status - check for Active first, then Pending Sync
         variantLockAction.verifyActiveOrPendingSyncStatus(page);
-        goTo(browsePage);
-        searchPage.threadWait();
-        searchPage.queryRuleByName(page);
         searchPageActions.deleteQueryRule(page);
         searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
     }
@@ -370,10 +361,6 @@ public class browseVariantPinning extends MerchVTest {
 
         // Verify status - check for Active first, then Pending Sync
         variantLockAction.verifyActiveOrPendingSyncStatus(page);
-
-        goTo(browsePage);
-        searchPage.threadWait();
-        searchPage.queryRuleByName(page);
         searchPageActions.deleteQueryRule(page);
         searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
     }
@@ -438,12 +425,7 @@ public class browseVariantPinning extends MerchVTest {
         Assert.assertNotNull(searchPage.queryRuleByName(page));
         pageRules.add(page);
 
-
-        goTo(browsePage);
-        searchPage.threadWait();
-        searchPage.queryRuleByName(page);
         searchPageActions.selectActionType(UnbxdEnum.PREVIEW, page);
-
         // Get the first product to verify UniqueId and VariantId
         FluentWebElement firstProduct = variantLockAction.getFirstProduct();
 
@@ -496,9 +478,6 @@ public class browseVariantPinning extends MerchVTest {
         // Verify status - check for Active first, then Pending Sync
         variantLockAction.verifyActiveOrPendingSyncStatus(page);
 
-        goTo(browsePage);
-        searchPage.threadWait();
-        searchPage.queryRuleByName(page);
         searchPageActions.deleteQueryRule(page);
         searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
     }
