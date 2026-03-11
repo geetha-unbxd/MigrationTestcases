@@ -143,25 +143,27 @@ pipeline {
             script {
                 if (params.TRIGGER_NEXT) {
                     try {
-                        // Job 1 -> Job 2 & Job 3
+                        // Chain 1: merchandisingNew -> FTU_SmokeTest
                         if (env.JOB_NAME == 'merchandisingNew') {
-                            build job: 'website-preview-automation',
-                                  parameters: [string(name: 'ENV', value: params.ENV), booleanParam(name: 'TRIGGER_NEXT', value: false)],
-                                  wait: false,
-                                  propagate: false
-                            build job: 'FTU_Selfserve',
+                            build job: 'FTU_SmokeTest',
                                   parameters: [string(name: 'ENV', value: params.ENV), booleanParam(name: 'TRIGGER_NEXT', value: false)],
                                   wait: false,
                                   propagate: false
                         }
-                        // Job 4 -> Job 5
+                        // Chain 2: selfServe_manage_testcases -> SS_BulkUploadTest -> website-preview-automation
                         else if (env.JOB_NAME == 'selfServe_manage_testcases') {
                             build job: 'SS_BulkUploadTest',
                                   parameters: [
                                       string(name: 'ENV', value: params.ENV),
                                       string(name: 'SUITE_FILE', value: 'src/test/resources/testNG/BulkUploadTest.xml'),
-                                      booleanParam(name: 'TRIGGER_NEXT', value: false)
+                                      booleanParam(name: 'TRIGGER_NEXT', value: true)
                                   ],
+                                  wait: false,
+                                  propagate: false
+                        }
+                        else if (env.JOB_NAME == 'SS_BulkUploadTest') {
+                            build job: 'website-preview-automation',
+                                  parameters: [string(name: 'ENV', value: params.ENV), booleanParam(name: 'TRIGGER_NEXT', value: false)],
                                   wait: false,
                                   propagate: false
                         }
