@@ -37,5 +37,8 @@ public class searchableFieldsAndFacetsPage extends UnbxdCommonPage {
     @FindBy(css=".fn-edit-accepted-container .fn-edit-info-wrapper")
     public  FluentWebElement updateMessageNotification;
 
+    @FindBy(xpath="//*[contains(text(),'message : Display-Name updation job in progress')]")
+    public  FluentWebElement updatejobinprogress;
+
 
 }
