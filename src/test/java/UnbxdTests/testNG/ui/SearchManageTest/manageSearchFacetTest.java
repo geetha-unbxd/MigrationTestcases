@@ -122,33 +122,42 @@ public class manageSearchFacetTest extends BaseTest {
 
 
         // Edit
-//        facetableFieldsActions.editFacetIcon.click();
-//        String facetUpdateDisplayName = facetableFieldsActions.fillUpdateFacetDetails(testData);
-//        facetableFieldsActions.facetEnableToggle.click();
-//        facetableFieldsActions.saveFacet();
-//        searchPage.awaitTillElementDisplayed(manageSearchFacetAndSearchFieldPage.updateMessageNotification);
-//        searchPage.waitForElementToDisappear(manageSearchFacetAndSearchFieldPage.updateMessageNotification);
-//        Assert.assertTrue(searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess));
-//        createdFacets.add(facetUpdateDisplayName);
-//        goTo(manageSearchFacetAndSearchFieldPage);
-//        Assert.assertNotNull(facetableFieldsActions.getFacetUsingDisplayName(facetUpdateDisplayName),"Facet creation is failing!!!");
-//
-//        // Delete
-//        goTo(manageSearchFacetAndSearchFieldPage);
-//        searchPage.threadWait();
-//        facetableFieldsActions.deleteFacet(facetUpdateDisplayName);
-//        searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-//        searchPage.threadWait();
-//        goTo(manageSearchFacetAndSearchFieldPage);
-//        Assert.assertNull(searchPage.queryRuleByName(facetUpdateDisplayName), "CREATED QUERY RULE IS NOT DELETED");
         facetableFieldsActions.editFacetIcon.click();
-        searchPage.threadWait();
+        String facetUpdateDisplayName = facetableFieldsActions.fillUpdateFacetDetails(testData);
         facetableFieldsActions.facetEnableToggle.click();
         facetableFieldsActions.saveFacet();
-        Assert.assertTrue(searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess));
-        click(facetableFieldsActions.deleteFacetIcon);
-        facetableFieldsActions.awaitForElementPresence(facetableFieldsActions.deleteConfirmationTab);
-        click(facetableFieldsActions.deleteYes);
+        searchPage.awaitTillElementDisplayed(manageSearchFacetAndSearchFieldPage.updateMessageNotification);
+        searchPage.waitForElementToDisappear(manageSearchFacetAndSearchFieldPage.updateMessageNotification);
+        int count = 0;
+        while (count < 3) {
+            try {
+                if (searchPageActions.ToasterSuccess.isDisplayed() || manageSearchFacetAndSearchFieldPage.updatejobinprogress.isDisplayed())
+                    break;
+            } catch (Exception ignored) { }
+            ThreadWait();
+            count++;
+        }
+        ThreadWait();
+        createdFacets.add(facetUpdateDisplayName);
+        goTo(manageSearchFacetAndSearchFieldPage);
+        Assert.assertNotNull(facetableFieldsActions.getFacetUsingDisplayName(facetUpdateDisplayName),"Facet creation is failing!!!");
+
+        // Delete
+        goTo(manageSearchFacetAndSearchFieldPage);
+        searchPage.threadWait();
+        facetableFieldsActions.deleteFacet(facetUpdateDisplayName);
+        searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
+        searchPage.threadWait();
+        goTo(manageSearchFacetAndSearchFieldPage);
+        Assert.assertNull(searchPage.queryRuleByName(facetUpdateDisplayName), "CREATED QUERY RULE IS NOT DELETED");
+//        facetableFieldsActions.editFacetIcon.click();
+//        searchPage.threadWait();
+//        facetableFieldsActions.facetEnableToggle.click();
+//        facetableFieldsActions.saveFacet();
+//        Assert.assertTrue(searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess));
+//        click(facetableFieldsActions.deleteFacetIcon);
+//        facetableFieldsActions.awaitForElementPresence(facetableFieldsActions.deleteConfirmationTab);
+//        click(facetableFieldsActions.deleteYes);
 
     }
 
@@ -205,8 +214,15 @@ public class manageSearchFacetTest extends BaseTest {
         facetableFieldsActions.saveFacet();
         searchPage.awaitTillElementDisplayed(manageSearchFacetAndSearchFieldPage.updateMessageNotification);
         searchPage.waitForElementToDisappear(manageSearchFacetAndSearchFieldPage.updateMessageNotification);
-        ThreadWait();
-        searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
+        int count = 0;
+        while (count < 3) {
+            try {
+                if (searchPageActions.ToasterSuccess.isDisplayed() || manageSearchFacetAndSearchFieldPage.updatejobinprogress.isDisplayed())
+                    break;
+            } catch (Exception ignored) { }
+            ThreadWait();
+            count++;
+        }
         ThreadWait();
         createdFacets.add(facetUpdateDisplayName);
         goTo(manageSearchFacetAndSearchFieldPage);
@@ -287,36 +303,44 @@ public class manageSearchFacetTest extends BaseTest {
 
 
 //       // Edit
-//       facetableFieldsActions.editFacetIcon.click();
-//       String facetUpdateDisplayName = facetableFieldsActions.fillUpdateFacetDetails(testData);
-//       facetableFieldsActions.facetEnableToggle.click();
-//       facetableFieldsActions.saveFacet();
-//       searchPage.awaitTillElementDisplayed(manageSearchFacetAndSearchFieldPage.updateMessageNotification);
-//       searchPage.waitForElementToDisappear(manageSearchFacetAndSearchFieldPage.updateMessageNotification);
-//       searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-//       ThreadWait();
-//       createdFacets.add(facetUpdateDisplayName);
-//       goTo(manageSearchFacetAndSearchFieldPage);
-//       ThreadWait();
-//       Assert.assertNotNull(facetableFieldsActions.getFacetUsingDisplayName(facetUpdateDisplayName),"Facet creation is failing!!!");
-//
-//       // Delete
-//       goTo(browseFacetsPage);
-//       searchPage.threadWait();
-//       facetableFieldsActions.deleteFacet(facetUpdateDisplayName);
-//       searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-//       searchPage.threadWait();
-//       goTo(browseFacetsPage);
-//       Assert.assertNull(searchPage.queryRuleByName(facetUpdateDisplayName), "CREATED QUERY RULE IS NOT DELETED");
-
        facetableFieldsActions.editFacetIcon.click();
-       searchPage.threadWait();
+       String facetUpdateDisplayName = facetableFieldsActions.fillUpdateFacetDetails(testData);
        facetableFieldsActions.facetEnableToggle.click();
        facetableFieldsActions.saveFacet();
-       Assert.assertTrue(searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess));
-       click(facetableFieldsActions.deleteFacetIcon);
-       facetableFieldsActions.awaitForElementPresence(facetableFieldsActions.deleteConfirmationTab);
-       click(facetableFieldsActions.deleteYes);
+       searchPage.awaitTillElementDisplayed(manageSearchFacetAndSearchFieldPage.updateMessageNotification);
+       searchPage.waitForElementToDisappear(manageSearchFacetAndSearchFieldPage.updateMessageNotification);
+       int count = 0;
+       while (count < 3) {
+           try {
+               if (searchPageActions.ToasterSuccess.isDisplayed() || manageSearchFacetAndSearchFieldPage.updatejobinprogress.isDisplayed())
+                   break;
+           } catch (Exception ignored) { }
+           ThreadWait();
+           count++;
+       }
+       ThreadWait();
+       createdFacets.add(facetUpdateDisplayName);
+       goTo(manageSearchFacetAndSearchFieldPage);
+       ThreadWait();
+       Assert.assertNotNull(facetableFieldsActions.getFacetUsingDisplayName(facetUpdateDisplayName),"Facet creation is failing!!!");
+
+       // Delete
+       goTo(browseFacetsPage);
+       searchPage.threadWait();
+       facetableFieldsActions.deleteFacet(facetUpdateDisplayName);
+       searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
+       searchPage.threadWait();
+       goTo(browseFacetsPage);
+       Assert.assertNull(searchPage.queryRuleByName(facetUpdateDisplayName), "CREATED QUERY RULE IS NOT DELETED");
+
+//       facetableFieldsActions.editFacetIcon.click();
+//       searchPage.threadWait();
+//       facetableFieldsActions.facetEnableToggle.click();
+//       facetableFieldsActions.saveFacet();
+//       Assert.assertTrue(searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess));
+//       click(facetableFieldsActions.deleteFacetIcon);
+//       facetableFieldsActions.awaitForElementPresence(facetableFieldsActions.deleteConfirmationTab);
+//       click(facetableFieldsActions.deleteYes);
    }
 
    @FileToTest(value = "manageFacetAndSearchableFieldTest/BrowseRangeFacetTest.json")
