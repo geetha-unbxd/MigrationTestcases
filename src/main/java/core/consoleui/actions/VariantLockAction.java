@@ -1287,7 +1287,7 @@ public class VariantLockAction extends VariantPage {
 
         // Use waitForLoaderToDisAppear with Config values, similar to waitForElementAppear pattern
         By syncingStatusLocator = By.cssSelector(".status-btn__variant");
-        int numOfRetries = 13;
+        int numOfRetries = 17;
         int waitTime = Config.getIntValueForProperty("indexing.wait.time");
 
         // Loop with refresh, similar to waitForElementAppear pattern (try 7 times)
