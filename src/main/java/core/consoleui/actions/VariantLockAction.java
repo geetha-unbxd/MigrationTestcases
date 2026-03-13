@@ -1281,13 +1281,13 @@ public class VariantLockAction extends VariantPage {
      */
     public void waitSyncingNotToBeDisplayed(String query) throws InterruptedException {
         awaitForPageToLoad();
-        Thread.sleep(15000);
+        Thread.sleep(5000);
         refreshPage();
         ThreadWait();
 
         // Use waitForLoaderToDisAppear with Config values, similar to waitForElementAppear pattern
         By syncingStatusLocator = By.cssSelector(".status-btn__variant");
-        int numOfRetries = 7;
+        int numOfRetries = 13;
         int waitTime = Config.getIntValueForProperty("indexing.wait.time");
 
         // Loop with refresh, similar to waitForElementAppear pattern (try 7 times)
