@@ -1,5 +1,5 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="ManageTestcases" parallel="tests" thread-count="11" verbose="10" preserve-order="false">
+<suite name="ManageTestcases" parallel="tests" thread-count="21" verbose="10" preserve-order="false">
 
     <!-- Bulk Upload Tests - Each in separate browser -->
     <test name="AlgorithmBulkUploadTest - uploadFilePhrases">

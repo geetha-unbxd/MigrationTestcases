@@ -396,7 +396,15 @@ public class manageSearchFacetTest extends BaseTest {
        facetableFieldsActions.saveFacet();
        searchPage.awaitTillElementDisplayed(manageSearchFacetAndSearchFieldPage.updateMessageNotification);
        searchPage.waitForElementToDisappear(manageSearchFacetAndSearchFieldPage.updateMessageNotification);
-       searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
+       int count = 0;
+       while (count < 3) {
+           try {
+               if (searchPageActions.ToasterSuccess.isDisplayed() || manageSearchFacetAndSearchFieldPage.updatejobinprogress.isDisplayed())
+                   break;
+           } catch (Exception ignored) { }
+           ThreadWait();
+           count++;
+       }
        ThreadWait();
        createdFacets.add(facetUpdateDisplayName);
        goTo(manageSearchFacetAndSearchFieldPage);

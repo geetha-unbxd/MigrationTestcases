@@ -33,14 +33,14 @@ sites:
     apiKey: 391c57cb8c2d71985f9ff9b806b43442
     secretKey: 165129dc3612fea3b83484e13c0394a5
     statusById : 4aefbb7d-32b4-4aba-bb9a-539f5c58da7f
-    siteId: 129
+    siteId: 139
     region: SG Customer Sites
     id: 2
   - siteKey: ss-unbxd-auk-v4SiteCreationTest391753250200
     apiKey: 391c57cb8c2d71985f9ff9b806b43442
     secretKey: 165129dc3612fea3b83484e13c0394a5
     statusById : 4aefbb7d-32b4-4aba-bb9a-539f5c58da7f
-    siteId: 30
+    siteId: 129
     region: AU Customer Sites
     id: 1
 
