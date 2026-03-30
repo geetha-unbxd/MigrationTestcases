@@ -117,6 +117,10 @@ public class BoostTest extends MerchandisingTest {
         merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
         merchandisingActions.MerchandisingStrategy.isDisplayed();
         ThreadWait();
+        merchandisingActions.scrollUntilVisible(merchandisingActions.MerchandisingStrategy);
+        merchandisingActions.waitForElementToBeClickable(merchandisingActions.MerchandisingStrategy, "View Merchandising Strategy");
+        merchandisingActions.clickUsingJS(merchandisingActions.MerchandisingStrategy);
+        
         verifyMerchandisingGenericData(object, UnbxdEnum.BOOST,true);
 
         goTo(searchPage);
