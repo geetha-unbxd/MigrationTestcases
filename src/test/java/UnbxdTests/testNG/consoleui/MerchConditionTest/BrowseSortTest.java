@@ -78,6 +78,8 @@ public class BrowseSortTest extends MerchandisingTest {
         merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
         merchandisingActions.MerchandisingStrategy.isDisplayed();
         ThreadWait(); // Additional wait for strategy details to load
+        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
+        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
         verifyMerchandisingData(object, UnbxdEnum.SORT,false);
 
         goTo(browsePage);
@@ -117,7 +119,8 @@ public class BrowseSortTest extends MerchandisingTest {
         merchandisingActions.MerchandisingStrategy.isDisplayed();
         ThreadWait(); // Additional wait for strategy details to load
         //verifyMerchandisingData(object, UnbxdEnum.SORT,true);
-
+        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
+        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
         searchPageActions.selectActionType(UnbxdEnum.PREVIEW, page);
         ThreadWait();
         String updatedcondition = searchPageActions.getConditionTitle();

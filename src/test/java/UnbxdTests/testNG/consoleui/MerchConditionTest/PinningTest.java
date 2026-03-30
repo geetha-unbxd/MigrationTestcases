@@ -87,6 +87,8 @@ public class  PinningTest extends MerchandisingTest {
         merchandisingActions.ClickViewHideInsight();
         merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
         merchandisingActions.MerchandisingStrategy.isDisplayed();
+        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
+        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
         verifyMerchandisingData(object, UnbxdEnum.PIN,false);
 
         goTo(searchPage);
@@ -125,6 +127,8 @@ public class  PinningTest extends MerchandisingTest {
         merchandisingActions.ClickViewHideInsight();
         merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
         merchandisingActions.MerchandisingStrategy.isDisplayed();
+        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
+        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
         verifyMerchandisingData(object, UnbxdEnum.PIN,true);
 
 

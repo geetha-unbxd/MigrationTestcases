@@ -112,6 +112,9 @@ public class    MerchandisingRulesPage extends CampaignCreationPage {
     @FindBy(xpath="(//*[@class='promotion-status-title'])[1]")
     public FluentWebElement MerchandisingStrategy;
 
+    @FindBy(xpath="//*[contains(text(),'Resolved Promotion')]//ancestor::*[@class='card ']//child::*[@class='promotion-status-title']")
+    public FluentWebElement promotionMerchandisingViewStrategy;
+
     @FindBy(xpath="(//*[@class='action-rules']//following::ul)[1]")
     public FluentWebElement MerchandisingStrategyBoostDetails;
 

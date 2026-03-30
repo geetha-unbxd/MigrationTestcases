@@ -82,6 +82,8 @@ public void browsePinningCreateTest(Object jsonObject) throws InterruptedExcepti
     merchandisingActions.ClickViewHideInsight();
     merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
     merchandisingActions.MerchandisingStrategy.isDisplayed();
+    merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
+    merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
     verifyMerchandisingData(object, UnbxdEnum.PIN,false);
 
     goTo(browsePage);
@@ -119,6 +121,8 @@ public void browsePinningCreateTest(Object jsonObject) throws InterruptedExcepti
     merchandisingActions.ClickViewHideInsight();
     merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
     merchandisingActions.MerchandisingStrategy.isDisplayed();
+    merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
+    merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
     verifyMerchandisingData(object, UnbxdEnum.PIN,true);
 
 

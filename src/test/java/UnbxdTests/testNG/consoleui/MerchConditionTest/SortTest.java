@@ -80,6 +80,8 @@ public class SortTest extends MerchandisingTest {
         merchandisingActions.ClickViewHideInsight();
         merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
         merchandisingActions.MerchandisingStrategy.isDisplayed();
+        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
+        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
         verifyMerchandisingData(object, UnbxdEnum.SORT,false);
 
         goTo(searchPage);
@@ -119,6 +121,8 @@ public class SortTest extends MerchandisingTest {
         merchandisingActions.ClickViewHideInsight();
         merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
         merchandisingActions.MerchandisingStrategy.isDisplayed();
+        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
+        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
         verifyMerchandisingData(object, UnbxdEnum.SORT,true);
 
         searchPageActions.selectActionType(UnbxdEnum.PREVIEW, query);

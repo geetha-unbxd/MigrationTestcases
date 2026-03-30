@@ -72,6 +72,8 @@ public class BrowseBoostTest extends MerchandisingTest {
         merchandisingActions.ClickViewHideInsight();
         merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
         merchandisingActions.MerchandisingStrategy.isDisplayed();
+        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
+        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
         verifyMerchandisingGenericData(object, UnbxdEnum.BOOST,false);
 
         goTo(browsePage);
@@ -102,6 +104,8 @@ public class BrowseBoostTest extends MerchandisingTest {
         merchandisingActions.ClickViewHideInsight();
         merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
         merchandisingActions.MerchandisingStrategy.isDisplayed();
+        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
+        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
         verifyMerchandisingGenericData(object, UnbxdEnum.BOOST,true);
 
         goTo(browsePage);

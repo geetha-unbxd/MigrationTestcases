@@ -82,6 +82,8 @@ public class BrowseSlotTest extends MerchandisingTest {
         merchandisingActions.ClickViewHideInsight();
         merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
         merchandisingActions.MerchandisingStrategy.isDisplayed();
+        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
+        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
         verifyMerchandisingGenericData(object, UnbxdEnum.SLOT,false);
 
         goTo(browsePage);
@@ -120,6 +122,8 @@ public class BrowseSlotTest extends MerchandisingTest {
         merchandisingActions.ClickViewHideInsight();
         merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
         merchandisingActions.MerchandisingStrategy.isDisplayed();
+        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
+        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
         verifyMerchandisingGenericData(object, UnbxdEnum.FILTER,true);
 
 
