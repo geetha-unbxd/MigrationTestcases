@@ -115,7 +115,7 @@ public class    MerchandisingRulesPage extends CampaignCreationPage {
     @FindBy(xpath="//*[contains(text(),'Resolved Promotion')]//ancestor::*[@class='card ']//child::*[@class='promotion-status-title']")
     public FluentWebElement promotionMerchandisingViewStrategy;
 
-    @FindBy(xpath="(//*[@class='action-rules']//following::ul)[1]")
+    @FindBy(xpath="//*[@class='action-icon boost-icon']")
     public FluentWebElement MerchandisingStrategyBoostDetails;
 
     @FindBy(xpath="(//*[contains(text(),'Resolved Promotion')]//following::*[contains(text(),'Merchandising Strategy')]//following::div[contains(@class,'summary-li ')])[1]//*[@class='summary-primary-tag-value']")
@@ -132,7 +132,7 @@ public class    MerchandisingRulesPage extends CampaignCreationPage {
     @FindBy(xpath="//*[contains(@class,'sort')]//li[contains(@class,'sort-summary-li')][1]/span[@class='summary-text']")
     public FluentWebElement MerchandisingStrategySortAttribute;
 
-    @FindBy(xpath="(//*[contains(@class,'filter')]//div[contains(@class,'summary-li')])[1]/span[@class='summary-primary-tag-value']\n")
+    @FindBy(xpath="(//*[contains(@class,'filter')]//div[contains(@class,'summary-li')])[1]/span[@class='summary-primary-tag-value']")
     public FluentWebElement MerchandisingStrategyFilterValue;
 
     @FindBy(xpath="(//*[contains(@class,'filter')]//div[contains(@class,'summary-li')])[1]/span[@class='summary-condition']")
