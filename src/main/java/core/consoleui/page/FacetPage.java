@@ -35,7 +35,7 @@ public class FacetPage extends CampaignCreationPage {
     @FindBy(css=".disable-all-facets")
     public FluentWebElement disableAllFacet;
 
-    @FindBy(css=".sc-jsEegq.eMxRVC.rdt_TableRow")
+    @FindBy(css=".sc-dnaVFx.ktWjJd.rdt_TableRow")
     public FluentList<FluentWebElement> facetList;
 
     @FindBy(css=".added-facets-table .RCB-table .RCB-tr")
