@@ -28,14 +28,14 @@ sites:
     apiKey: a49d88035645cfc4876826ec4ede5492
     secretKey: fc54c93d6c6a91a5afd3570622da4575
     statusById: 84b5b88e-fc40-454f-baf8-12b710bf711c
-    siteId: 2942
+    siteId: 2974
     region: AZ Customer Sites
     id: 1
   - siteKey: ss-unbxd-aanz-jerymosfeedAutomation39471752670022
     apiKey: a49d88035645cfc4876826ec4ede5492
     secretKey: fc54c93d6c6a91a5afd3570622da4575
     statusById: 84b5b88e-fc40-454f-baf8-12b710bf711c
-    siteId: 2941
+    siteId: 2973
     region: AZ Customer Sites
     id: 2
   - siteKey: ss-unbxd-aanz-jerymosfeedAutomation39471752670022
