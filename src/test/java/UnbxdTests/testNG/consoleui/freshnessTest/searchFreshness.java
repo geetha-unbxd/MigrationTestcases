@@ -13,6 +13,7 @@ import lib.annotation.FileToTest;
 import lib.enums.UnbxdEnum;
 import lib.compat.Page;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -143,6 +144,11 @@ public class searchFreshness extends MerchandisingTest {
         ThreadWait();
         FreshnessAction.verifyDateIsoForFirstFiveProducts(daysThreshold);
 
+    }
+
+    @AfterClass(alwaysRun = true, groups = {"sanity"})
+    public void deleteCreatedRules() throws InterruptedException {
+        deleteSearchQueryRuleIfPresent(query);
     }
 
 }

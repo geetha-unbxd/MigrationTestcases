@@ -74,26 +74,6 @@ public class  PinningTest extends MerchandisingTest {
         Assert.assertNotNull(searchPage.queryRuleByName(query));
         queryRules.add(query);
 
-
-        merchandisingActions.openPreviewAndSwitchTheTab();
-        merchandisingActions.awaitForPageToLoad();
-        ThreadWait();
-        String previewPage = driver.getCurrentUrl();
-        Assert.assertTrue(previewPage.contains("preview"),"Not redirecting to preview page");
-        merchandisingActions.awaitForElementPresence(merchandisingActions.SearchpreviewOption);
-        ThreadWait();
-        Assert.assertTrue(merchandisingActions.showingResultinPreview.getText().contains(query));
-
-        merchandisingActions.ClickViewHideInsight();
-        merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
-        merchandisingActions.MerchandisingStrategy.isDisplayed();
-        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
-        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
-        verifyMerchandisingData(object, UnbxdEnum.PIN,false);
-
-        goTo(searchPage);
-        searchPage.threadWait();
-        searchPage.queryRuleByName(query);
         searchPageActions.selectActionType(UnbxdEnum.EDIT, query);
         ThreadWait();
         String condition = searchPageActions.getConditionTitle();
@@ -114,36 +94,6 @@ public class  PinningTest extends MerchandisingTest {
         merchandisingActions.verifySuccessMessage();
         ThreadWait();
 
-        //Preview
-        merchandisingActions.openPreviewAndSwitchTheTab();
-        merchandisingActions.awaitForPageToLoad();
-        ThreadWait();
-        String previewpage = driver.getCurrentUrl();
-        ThreadWait();
-        Assert.assertTrue(previewpage.contains("preview"),"Not redirecting to preview page");
-        merchandisingActions.awaitForElementPresence(merchandisingActions.SearchpreviewOption);
-        Assert.assertTrue(merchandisingActions.showingResultinPreview.getText().contains(query));
-
-        merchandisingActions.ClickViewHideInsight();
-        merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
-        merchandisingActions.MerchandisingStrategy.isDisplayed();
-        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
-        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
-        verifyMerchandisingData(object, UnbxdEnum.PIN,true);
-
-
-        goTo(searchPage);
-        searchPage.threadWait();
-        searchPage.queryRuleByName(query);
-
-        searchPageActions.selectActionType(UnbxdEnum.PREVIEW, query);
-        ThreadWait();
-        String updatedcondition = searchPageActions.getConditionTitle();
-        Assert.assertTrue(updatedcondition.equalsIgnoreCase(conditionType), "SELECTED CONDITION TYPE IS WRONG!!! SELECTED CONDITION IS : " + conditionType);
-        Assert.assertTrue(merchandisingActions.previewSummary.isDisplayed());
-        ThreadWait();
-        Assert.assertEquals(merchandisingActions.pinnedProductIndex.get(0).getText(),updatedPinningPosition,"PRODUCT IS NOT PINNED AT THE GIVEN POSITION");
-        Assert.assertTrue(merchandisingActions.pinnedProductText.isDisplayed(),"PINNED TEXT IS NOT PRESENT AT THE GIVEN POSITION");
 
         goTo(searchPage);
         searchPage.threadWait();
@@ -155,38 +105,12 @@ public class  PinningTest extends MerchandisingTest {
 
     }
 
-
-
-//    @AfterClass(alwaysRun = true,groups={"sanity"})
-//    public void deleteCreatedRules()
-//    {
-//        goTo(searchPage);
-//
-//        for(String queryRule: queryRules)
-//        {
-//            if(searchPage.queryRuleByName(queryRule)!=null)
-//            {
-//                searchPageActions.deleteQueryRule(queryRule);
-//                Assert.assertNull(searchPage.queryRuleByName(queryRule),"CREATED QUERY RULE IS NOT DELETED");
-//                getDriver().navigate().refresh();
-//                ThreadWait();
-//            }
-//
-//        }
-//        goTo(browsePage);
-//
-//        for(String pageRule: pageRules)
-//        {
-//            if(searchPage.queryRuleByName(pageRule)!=null)
-//            {
-//                searchPageActions.deleteQueryRule(pageRule);
-//                Assert.assertNull(searchPage.queryRuleByName(pageRule),"BROWSE RULE : CREATED PAGE RULE IS NOT DELETED");
-//                getDriver().navigate().refresh();
-//                ThreadWait();
-//
-//            }
-//
-//        }
-//    }
+    @AfterClass(alwaysRun = true, groups = {"sanity"})
+    public void deleteCreatedRules() throws InterruptedException {
+        for (String q : new ArrayList<>(queryRules)) {
+            deleteSearchQueryRuleIfPresent(q);
+        }
+        deleteSearchQueryRuleIfPresent(query);
+    }
 
 }

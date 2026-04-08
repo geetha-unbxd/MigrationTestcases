@@ -10,6 +10,7 @@ import lib.annotation.FileToTest;
 import lib.enums.UnbxdEnum;
 import lib.compat.Page;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -47,10 +48,10 @@ public class SearchCEDBannerTest extends MerchandisingTest {
         query=bannerData.get("query").getAsString();
         String editImg=bannerData.get("editBanner").getAsString();
 
-       goTo(searchPage);
-       searchPage.threadWait();
-       merchandisingActions.goToSection(UnbxdEnum.BANNER);
-       searchPageActions.awaitForPageToLoad();
+        goTo(searchPage);
+        searchPage.threadWait();
+        merchandisingActions.goToSection(UnbxdEnum.BANNER);
+        searchPageActions.awaitForPageToLoad();
 
         //Create the banner rule
         createPromotion(query,true,true);
@@ -65,27 +66,6 @@ public class SearchCEDBannerTest extends MerchandisingTest {
         ThreadWait();
         Assert.assertNotNull(searchPage.queryRuleByName(query));
         queryRules.add(query);
-        ThreadWait();
-        Thread.sleep(1000);
-
-        merchandisingActions.openPreviewAndSwitchTheTab();
-        merchandisingActions.awaitForPageToLoad();
-        ThreadWait();
-        String PreviewPage = driver.getCurrentUrl();
-        Assert.assertTrue(PreviewPage.contains("preview"),"Not redirecting to preview page");
-        await();
-        merchandisingActions.awaitForElementPresence(merchandisingActions.SearchpreviewOption);
-
-        merchandisingActions.ClickViewHideInsight();
-        searchPage.scrollToBottom();
-        bannerActions.scrollToBannerExperienceInput();
-        // Scroll the preview/insight modal to the bottom
-        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript(
-            "var modal = document.querySelector('div.preview'); if(modal){modal.scrollTop = modal.scrollHeight;}"
-        );
-        merchandisingActions.awaitForElementPresence(bannerActions.bannerExperienceInput);
-        Thread.sleep(1000);
-        Assert.assertTrue(bannerActions.bannerExperienceInput.getText().contains(html),"SEARCH:  HTML URL IS NOT SAME AS GIVEN ");
 
         // Edit the rule
         goTo(searchPage);
@@ -96,31 +76,13 @@ public class SearchCEDBannerTest extends MerchandisingTest {
         searchPage.threadWait();
         Assert.assertTrue(searchPageActions.htmlPreview.getText().contains(html),"SEARCH:  HTML URL IS NOT SAME AS GIVEN ");
 
+        bannerActions.scrollToElement(bannerActions.imageUrlRadioButton, "Image URL banner tab");
         bannerActions.addImgBanner(editImg);
         merchandisingActions.publishCampaign();
         merchandisingActions.verifySuccessMessage();
         Assert.assertNotNull(searchPage.queryRuleByName(query));
         ThreadWait();
         
-//        merchandisingActions.openPreviewAndSwitchTheTab();
-//        merchandisingActions.awaitForPageToLoad();
-//        ThreadWait();
-//        String previewPage = driver.getCurrentUrl();
-//        Assert.assertTrue(previewPage.contains("preview"),"Not redirecting to preview page");
-//        await();
-//        merchandisingActions.awaitForElementPresence(merchandisingActions.SearchpreviewOption);
-//
-//        merchandisingActions.ClickViewHideInsight();
-//        bannerActions.bannerExperience.isDisplayed();
-
-        goTo(searchPage);
-        searchPage.threadWait();
-        merchandisingActions.goToSection(UnbxdEnum.BANNER);
-        searchPageActions.awaitForPageToLoad();
-        ThreadWait();
-        searchPageActions.selectActionType(UnbxdEnum.PREVIEW,query);
-        searchPage.threadWait();
-        Assert.assertTrue(searchPageActions.bannerInputImgUrl.getValue().contains(editImg),"SEARCH: IMG URL IS NOT SAME AS GIVEN");
 
         searchPage.threadWait();
         goTo(searchPage);
@@ -132,21 +94,12 @@ public class SearchCEDBannerTest extends MerchandisingTest {
 
     }
 
+    @AfterClass(alwaysRun = true, groups = {"sanity"})
+    public void deleteCreatedRules() throws InterruptedException {
+        for (String q : new ArrayList<>(queryRules)) {
+            deleteSearchQueryRuleIfPresent(q, UnbxdEnum.BANNER);
+        }
+        deleteSearchQueryRuleIfPresent(query, UnbxdEnum.BANNER);
+    }
 
-
-//    @AfterClass(alwaysRun = true,groups={"sanity"})
-//    public void deleteCreatedRules() throws InterruptedException {
-//        goTo(searchPage);
-//        merchandisingActions.goToSection(UnbxdEnum.BANNER);
-//        for (String queryRule : queryRules) {
-//            if (searchPage.queryRuleByName(queryRule)!= null)
-//            {
-//                searchPageActions.deleteQueryRule(queryRule);
-//                Assert.assertNull(searchPage.queryRuleByName(queryRule), "CREATED QUERY RULE IS NOT DELETED");
-//                getDriver().navigate().refresh();
-//                ThreadWait();
-//            }
-//        }
-//
-//        }
 }

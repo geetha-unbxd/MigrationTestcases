@@ -140,7 +140,7 @@ public class CampaignCreationPage extends UnbxdCommonPage {
         awaitForElementPresence(campaignNameInput);
         campaignNameInput.fill().with(campaignName);
         clickMoreOptionIfPresent();
-
+        ThreadWait();
         awaitTillElementDisplayed(nextButton);
         nextButton.click();
         awaitForPageToLoad();

@@ -167,6 +167,21 @@ public class CommercePageActions extends CommerceSearchPage {
         return conditionSummary.size();
     }
 
+    /** Text shown for the campaign after opening Edit (summary strip + each rule row). Use to assert selected attribute labels are visible. */
+    public String getAggregatedPromotionSummaryText()
+    {
+        threadWait();
+        scrollToBottom();
+        StringBuilder sb = new StringBuilder();
+        if (awaitForElementPresence(promotionRuleSummary)) {
+            sb.append(promotionRuleSummary.getText().trim());
+        }
+        for (int i = 0; i < conditionSummary.size(); i++) {
+            sb.append(' ').append(conditionSummary.get(i).getText().trim());
+        }
+        return sb.toString();
+    }
+
     public int getConditionSizeForConditionType(String conditiontype)
     {
         ThreadWait();

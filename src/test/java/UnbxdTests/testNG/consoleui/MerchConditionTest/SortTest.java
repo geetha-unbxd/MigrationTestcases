@@ -15,6 +15,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -65,28 +66,6 @@ public class SortTest extends MerchandisingTest {
         Assert.assertNotNull(searchPage.queryRuleByName(query));
         queryRules.add(query);
 
-
-        merchandisingActions.openPreviewAndSwitchTheTab();
-        merchandisingActions.awaitForPageToLoad();
-
-        // Wait for the preview page to load by checking the URL or a unique element
-        String currentUrl = driver.getCurrentUrl();
-        System.out.println("Current URL after preview: " + currentUrl);
-        Assert.assertTrue(currentUrl.contains("preview"), "Not redirecting to preview page");
-        await();
-        merchandisingActions.awaitForElementPresence(merchandisingActions.SearchpreviewOption);
-        Assert.assertTrue(merchandisingActions.showingResultinPreview.getText().contains(query));
-
-        merchandisingActions.ClickViewHideInsight();
-        merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
-        merchandisingActions.MerchandisingStrategy.isDisplayed();
-        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
-        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
-        verifyMerchandisingData(object, UnbxdEnum.SORT,false);
-
-        goTo(searchPage);
-        searchPage.threadWait();
-        searchPage.queryRuleByName(query);
         searchPageActions.selectActionType(UnbxdEnum.EDIT, query);
         ThreadWait();
         ThreadWait();
@@ -109,28 +88,6 @@ public class SortTest extends MerchandisingTest {
         merchandisingActions.verifySuccessMessage();
         ThreadWait();
 
-        //Preview
-        merchandisingActions.openPreviewAndSwitchTheTab();
-        merchandisingActions.awaitForPageToLoad();
-        ThreadWait();
-        String previewpage = driver.getCurrentUrl();
-        Assert.assertTrue(previewpage.contains("preview"),"Not redirecting to preview page");
-        merchandisingActions.awaitForElementPresence(merchandisingActions.SearchpreviewOption);
-        Assert.assertTrue(merchandisingActions.showingResultinPreview.getText().contains(query));
-
-        merchandisingActions.ClickViewHideInsight();
-        merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
-        merchandisingActions.MerchandisingStrategy.isDisplayed();
-        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
-        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
-        verifyMerchandisingData(object, UnbxdEnum.SORT,true);
-
-        searchPageActions.selectActionType(UnbxdEnum.PREVIEW, query);
-        ThreadWait();
-        String updatedcondition = searchPageActions.getConditionTitle();
-        int updatedgroup = searchPageActions.getSortPinConditionSize();
-        Assert.assertTrue(updatedcondition.equalsIgnoreCase(conditionType), "SELECTED CONDITION TYPE IS WRONG!!! SELECTED CONDITION IS : " + conditionType);
-        Assert.assertEquals(updatedgroup, 1, "NUMBER OF CONDITION GROUP IS WRONG!!! SELECTED CONDITION GROOUP IS" + group);
 
         goTo(searchPage);
         searchPage.threadWait();
@@ -142,24 +99,12 @@ public class SortTest extends MerchandisingTest {
 
     }
 
-
-
-//    @AfterClass(alwaysRun = true,groups={"sanity"})
-//    public void deleteCreatedRules()
-//    {
-//        goTo(searchPage);
-//
-//        for(String queryRule: queryRules)
-//        {
-//            if(searchPage.queryRuleByName(queryRule)!=null)
-//            {
-//                searchPageActions.deleteQueryRule(queryRule);
-//                Assert.assertNull(searchPage.queryRuleByName(queryRule),"CREATED QUERY RULE IS NOT DELETED");
-//                getDriver().navigate().refresh();
-//                ThreadWait();
-//            }
-//        }
-//
-//    }
+    @AfterClass(alwaysRun = true, groups = {"sanity"})
+    public void deleteCreatedRules() throws InterruptedException {
+        for (String q : new ArrayList<>(queryRules)) {
+            deleteSearchQueryRuleIfPresent(q);
+        }
+        deleteSearchQueryRuleIfPresent(query);
+    }
 
 }

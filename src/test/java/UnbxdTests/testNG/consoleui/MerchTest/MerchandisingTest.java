@@ -3,6 +3,7 @@ package UnbxdTests.testNG.consoleui.MerchTest;
 import UnbxdTests.testNG.ui.BaseTest;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import core.consoleui.page.BrowsePage;
 import core.consoleui.actions.CommercePageActions;
 import core.consoleui.actions.MerchandisingActions;
 import core.ui.actions.LoginActions;
@@ -15,6 +16,8 @@ import org.testng.Assert;
 
 import java.io.File;
 import core.ui.page.UiBase;
+
+import static core.ui.page.UiBase.ThreadWait;
 
 
 public class MerchandisingTest extends BaseTest {
@@ -89,6 +92,7 @@ public class MerchandisingTest extends BaseTest {
             }
         }
 
+
     public void createBrowsePromotion(String page,boolean bannerOrFacet,boolean queryBasedBanner) throws InterruptedException {
         searchPage.awaitForPageToLoad();
         if(searchPage.queryRuleByName(page)!=null) {
@@ -132,6 +136,7 @@ public class MerchandisingTest extends BaseTest {
     }
 
     public void fillMerchandisingData(JsonArray object, UnbxdEnum section, boolean useUpdatedData) throws InterruptedException {
+        merchandisingActions.clearSelectedAttributeOptionTexts();
         for(int i=0;i<object.size();i++)
         {
             if(i!=0)
@@ -468,6 +473,66 @@ public class MerchandisingTest extends BaseTest {
         }
     }
 
+
+    /**
+     * Best-effort delete of a search query rule if it still exists (e.g. after a failing test).
+     *
+     * @param section optional; when non-null, navigates to that merchandising section before delete (BANNER, REDIRECT, FACETS, etc.).
+     */
+    protected void deleteSearchQueryRuleIfPresent(String ruleName, UnbxdEnum section) throws InterruptedException {
+        if (ruleName == null || ruleName.isBlank()) {
+            return;
+        }
+        try {
+            goTo(searchPage);
+            searchPage.threadWait();
+            if (section != null) {
+                merchandisingActions.goToSection(section);
+            }
+            if (searchPage.queryRuleByName(ruleName) == null) {
+                return;
+            }
+            searchPage.deleteQueryRule(ruleName);
+            searchPage.awaitTillElementDisplayed(searchPage.ToasterSuccess);
+            ThreadWait();
+        } catch (Throwable t) {
+            System.err.println("deleteSearchQueryRuleIfPresent: " + t.getMessage());
+        }
+    }
+
+    protected void deleteSearchQueryRuleIfPresent(String ruleName) throws InterruptedException {
+        deleteSearchQueryRuleIfPresent(ruleName, null);
+    }
+
+    /**
+     * Best-effort delete of a browse page rule if it still exists.
+     *
+     * @param section optional merchandising section; null skips goToSection (use when listing is already correct after goTo browse).
+     */
+    protected void deleteBrowsePageRuleIfPresent(BrowsePage browsePageRef, String ruleName, UnbxdEnum section) throws InterruptedException {
+        if (ruleName == null || ruleName.isBlank()) {
+            return;
+        }
+        try {
+            goTo(browsePageRef);
+            searchPage.threadWait();
+            if (section != null) {
+                merchandisingActions.goToSection(section);
+            }
+            if (searchPage.queryRuleByName(ruleName) == null) {
+                return;
+            }
+            searchPage.deleteQueryRule(ruleName);
+            searchPage.awaitTillElementDisplayed(searchPage.ToasterSuccess);
+            ThreadWait();
+        } catch (Throwable t) {
+            System.err.println("deleteBrowsePageRuleIfPresent: " + t.getMessage());
+        }
+    }
+
+    protected void deleteBrowsePageRuleIfPresent(BrowsePage browsePageRef, String ruleName) throws InterruptedException {
+        deleteBrowsePageRuleIfPresent(browsePageRef, ruleName, null);
+    }
 
     @AfterClass
     public void tearDown()

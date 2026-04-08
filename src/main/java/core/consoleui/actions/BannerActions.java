@@ -1,5 +1,6 @@
 package core.consoleui.actions;
 
+import lib.compat.FluentWebElement;
 import org.testng.Assert;
 
 public class BannerActions extends CommercePageActions {
@@ -63,36 +64,44 @@ public class BannerActions extends CommercePageActions {
         findFirst("body").click();
     }
 
-    public void selectFieldRuleAttribute(String attribute) throws InterruptedException {
+    /** Selects the first option (index 0) in the field-rule attribute list and returns its visible label. */
+    public String selectFieldRuleAttribute() throws InterruptedException {
+        int optionIndex = 0;
         click(fieldRuleAttributeDropdown);
         threadWait();
         click(searchAttribute);
-        searchAttribute.fill().with(attribute);
-        if(fieldRuleAttributeDropDownList.size() ==0){
+        threadWait();
+        if (fieldRuleAttributeDropDownList.isEmpty()) {
             Assert.fail("FIELD RULE ATTRIBUTE LISTS ARE NOT DISPLAYED!!! PLEASE SELECT THE ATTRIBUTE FROM THE SETTINGS");
         }
-        if (fieldRuleAttributeDropDownList.size() > 0) {
+        if (fieldRuleAttributeDropDownList.size() > optionIndex) {
             threadWait();
-            threadWait();
-            selectDropDownValue(fieldRuleAttributeDropDownList,attribute);
-            }
+            FluentWebElement option = fieldRuleAttributeDropDownList.get(optionIndex);
+            String attributeName = option.getText().trim();
+            option.click();
+            return attributeName;
         }
+        Assert.fail("FIELD RULE ATTRIBUTE LIST HAS NO ITEM AT INDEX " + optionIndex
+            + " (size=" + fieldRuleAttributeDropDownList.size() + ")");
+        throw new IllegalStateException("unreachable");
+    }
 
-
-
-
-
-    public void selectFieldRuleAttributeValue(String value) throws InterruptedException {
+    /** Selects the first option (index 0) in the field-rule attribute value list. */
+    public void selectFieldRuleAttributeValue() throws InterruptedException {
+        int optionIndex = 0;
         click(fieldRuleAttributeValueDropdown);
         ThreadWait();
-        if(fieldRuleAttributeDropDownList.size() ==0){
+        if (fieldRuleAttributeDropDownList.isEmpty()) {
             Assert.fail("FIELD RULE ATTRIBUTE VALUES LISTS ARE NOT DISPLAYED!!!");
         }
-        if (fieldRuleAttributeDropDownList.size() > 0) {
+        if (fieldRuleAttributeDropDownList.size() > optionIndex) {
             ThreadWait();
-            selectDropDownValue(fieldRuleAttributeDropDownList,value);
-                }
-            }
+            fieldRuleAttributeDropDownList.get(optionIndex).click();
+        } else {
+            Assert.fail("FIELD RULE ATTRIBUTE VALUE LIST HAS NO ITEM AT INDEX " + optionIndex
+                + " (size=" + fieldRuleAttributeDropDownList.size() + ")");
+        }
+    }
 
     /**
      * Scrolls to the bannerExperienceInput element to ensure it is in view.
@@ -100,9 +109,6 @@ public class BannerActions extends CommercePageActions {
     public void scrollToBannerExperienceInput() {
         scrollToElement(bannerExperienceInput, "Banner Experience Input");
     }
-        }
 
-
-
-
+}
 

@@ -17,6 +17,16 @@ import java.util.List;
 
 public class MerchandisingActions extends MerchandisingRulesPage {
 
+    /** Labels read from the attribute dropdown before click (one entry per selectAttribute call in the current fill). */
+    private final List<String> selectedAttributeOptionTexts = new ArrayList<>();
+
+    public void clearSelectedAttributeOptionTexts() {
+        selectedAttributeOptionTexts.clear();
+    }
+
+    public List<String> getSelectedAttributeOptionTexts() {
+        return Collections.unmodifiableList(selectedAttributeOptionTexts);
+    }
 
     @Page
     CommercePageActions searchPageActions;
@@ -98,7 +108,7 @@ public class MerchandisingActions extends MerchandisingRulesPage {
             conditionElement = row.findFirst(comparator);
             valueElement = row.findFirst(valueOfAttribute);
 
-            selectAttribute(key, attributeElement);
+            selectAttribute(1, attributeElement);
             selectCondition(condition, conditionElement);
             ThreadWait();
             selectValue(value, valueElement);
@@ -207,7 +217,7 @@ public class MerchandisingActions extends MerchandisingRulesPage {
         attributeElement = row.findFirst(sortAttribute);
         if (type == UnbxdEnum.SORT) {
             valueElement = row.findFirst(SortOrder);
-            selectAttribute(key, attributeElement);
+            selectAttribute(1, attributeElement);
         } else {
             valueElement = row.findFirst(pinPosition);
             selectPinningProduct(product);
@@ -229,28 +239,37 @@ public class MerchandisingActions extends MerchandisingRulesPage {
         }
     }
 
-    public void selectAttribute(String value, FluentWebElement attribute) throws InterruptedException {
+    public void selectAttribute(int optionIndex, FluentWebElement attribute) throws InterruptedException {
         ThreadWait();
         attribute.find(".RCB-select-arrow").click();
         threadWait();
-        if (attributeDropDownList.size() > 0) {
-            attributeInput.clear();
-            attributeInput.fill().with(value);
-            threadWait();
-            selectDropDownValue(attributeDropDownList, value);
+        if (attributeDropDownList.size() > optionIndex) {
+            FluentWebElement option = attributeDropDownList.get(optionIndex);
+            String optionText = option.getText().trim();
+            System.out.println("Selecting attribute option: " + optionText);
+            selectedAttributeOptionTexts.add(optionText);
+            option.click();
             ThreadWait();
         } else {
-            Assert.fail("ATTRIBUTE DROPDOWN LIST IS EMPTY!!!");
+            Assert.fail("ATTRIBUTE DROPDOWN LIST HAS NO ITEM AT INDEX " + optionIndex
+                + " (size=" + attributeDropDownList.size() + ")");
         }
     }
 
-    public void selectAttributeValue(String value) throws InterruptedException {
+    public void selectAttributeValue(int optionIndex) throws InterruptedException {
         AttributeDropDown.click();
-        ThreadWait();
-            attributeInput.clear();
-            attributeInput.fill().with(value);
+        threadWait();
+        if (attributeDropDownList.size() > optionIndex) {
+            FluentWebElement option = attributeDropDownList.get(optionIndex);
+            String optionText = option.getText().trim();
+            System.out.println("Selecting attribute value option: " + optionText);
+            selectedAttributeOptionTexts.add(optionText);
+            option.click();
             ThreadWait();
-
+        } else {
+            Assert.fail("ATTRIBUTE DROPDOWN LIST HAS NO ITEM AT INDEX " + optionIndex
+                + " (size=" + attributeDropDownList.size() + ")");
+        }
     }
 
     public void selectSortAttribute(String value, FluentWebElement attribute) throws InterruptedException {

@@ -52,8 +52,6 @@ public class BrowseBannerTest extends MerchandisingTest {
         JsonObject bannerData = (JsonObject) jsonObject;
         String Attribute = bannerData.get("Attribute").getAsString();
         String value = bannerData.get("Value").getAsString();
-        page = bannerData.get("page").getAsString();
-
         goTo(browsePage);
         searchPage.threadWait();
         merchandisingActions.goToSection(UnbxdEnum.BANNER);
@@ -62,11 +60,12 @@ public class BrowseBannerTest extends MerchandisingTest {
         //create the rule
         String ImgUrl= bannerData.get("data").getAsString();
         String editImgUrl=bannerData.get("editBanner").getAsString();
-        createBrowsePromotion(page,true,false);
+        searchPageActions.clickOnAddRule(true);
+        searchPageActions.goToQueryBasedBanner();
         bannerActions.goToFieldRuleBanner();
-        bannerActions.selectFieldRuleAttribute(Attribute);
+        page=bannerActions.selectFieldRuleAttribute();
         ThreadWait();
-        bannerActions.selectFieldRuleAttributeValue(value);
+        bannerActions.selectFieldRuleAttributeValue();
         click(searchPageActions.nextButton);
         bannerActions.addHtmlBanner(ImgUrl);
         ThreadWait();
@@ -97,34 +96,12 @@ public class BrowseBannerTest extends MerchandisingTest {
 
     }
 
+    @AfterClass(alwaysRun = true, groups = {"sanity"})
+    public void deleteCreatedRules() throws InterruptedException {
+        for (String p : new ArrayList<>(pageRules)) {
+            deleteBrowsePageRuleIfPresent(browsePage, p, UnbxdEnum.BANNER);
+        }
+        deleteBrowsePageRuleIfPresent(browsePage, page, UnbxdEnum.BANNER);
+    }
 
-
-
-//    @AfterClass(alwaysRun = true,groups={"sanity"})
-//    public void deleteCreatedRules() throws InterruptedException {
-//        goTo(searchPage);
-//        merchandisingActions.goToSection(UnbxdEnum.BANNER);
-//        for (String queryRule : queryRules) {
-//            if (searchPage.queryRuleByName(queryRule)!= null)
-//            {
-//                searchPageActions.deleteQueryRule(queryRule);
-//                Assert.assertNull(searchPage.queryRuleByName(queryRule), "CREATED QUERY RULE IS NOT DELETED");
-//                getDriver().navigate().refresh();
-//                ThreadWait();
-//            }
-//        }
-//
-//            goTo(browsePage);
-//            merchandisingActions.goToSection(UnbxdEnum.BANNER);
-//            for (String pageRule : pageRules) {
-//                if (searchPage.queryRuleByName(pageRule) != null) {
-//                    searchPageActions.deleteQueryRule(pageRule);
-//                    Assert.assertNull(searchPage.queryRuleByName(pageRule), "BROWSE RULE : CREATED PAGE RULE IS NOT DELETED");
-//                    getDriver().navigate().refresh();
-//                    ThreadWait();
-//
-//
-//                }
-//            }
-//        }
 }

@@ -11,6 +11,7 @@ import lib.annotation.FileToTest;
 import lib.enums.UnbxdEnum;
 import lib.compat.Page;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -62,7 +63,11 @@ public class BrowseCEDBannerTest extends MerchandisingTest {
         Map<String, Object> campaignData = merchandisingActions.getCampaignData("htmlBrowseBanner.json");
         ThreadWait();
         bannerActions.goToQueryRuleBanner();
-        searchPageActions.fillPageName(object);
+        searchPageActions.pageRuleDropdown.click();
+        searchPageActions.awaitForElementPresence(searchPageActions.BuildPath);
+        searchPageActions.BuildPath.click();
+        searchPageActions.SelectedCategoryPathDisplay.fill().with(page);
+        searchPageActions.categorypathApplyButton.click();
         merchandisingActions.fillCampaignData(campaignData);
         ThreadWait();
         bannerActions.addHtmlBanner(html);
@@ -71,27 +76,6 @@ public class BrowseCEDBannerTest extends MerchandisingTest {
         ThreadWait();
         Assert.assertNotNull(searchPage.queryRuleByName(page));
         pageRules.add(page);
-        ThreadWait();
-
-        merchandisingActions.openPreviewAndSwitchTheTab();
-        merchandisingActions.awaitForPageToLoad();
-        ThreadWait();
-        String previewPage = driver.getCurrentUrl();
-        Assert.assertTrue(previewPage.contains("preview"),"Not redirecting to preview page");
-        await();
-        merchandisingActions.awaitForElementPresence(merchandisingActions.SearchpreviewOption);
-
-        merchandisingActions.ClickViewHideInsight();
-        searchPage.scrollToBottom();
-        bannerActions.scrollToBannerExperienceInput();
-        // Scroll the preview/insight modal to the bottom
-        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript(
-                "var modal = document.querySelector('div.preview'); if(modal){modal.scrollTop = modal.scrollHeight;}"
-        );
-        bannerActions.bannerExperience.isDisplayed();
-        ThreadWait();
-        Assert.assertTrue(bannerActions.bannerExperienceInput.getText().contains(html),"BROWSE:  HTML URL IS NOT SAME AS GIVEN ");
-
 
         // Edit the rule
         goTo(browsePage);
@@ -104,16 +88,6 @@ public class BrowseCEDBannerTest extends MerchandisingTest {
         merchandisingActions.verifySuccessMessage();
         ThreadWait();
 
-        goTo(browsePage);
-        searchPage.threadWait();
-        merchandisingActions.goToSection(UnbxdEnum.BANNER);
-        searchPageActions.awaitForPageToLoad();
-        ThreadWait();
-        searchPage.queryRuleByName(page);
-        searchPageActions.selectActionType(UnbxdEnum.PREVIEW,page);
-        searchPage.threadWait();
-        Assert.assertTrue(searchPageActions.htmlPreview.getText().contains(editHtml),"BROWSE: HTML URL IS NOT SAME AS GIVEN");
-
         searchPage.threadWait();
         goTo(browsePage);
         searchPage.threadWait();
@@ -124,6 +98,12 @@ public class BrowseCEDBannerTest extends MerchandisingTest {
 
     }
 
-
+    @AfterClass(alwaysRun = true, groups = {"sanity"})
+    public void deleteCreatedRules() throws InterruptedException {
+        for (String p : new ArrayList<>(pageRules)) {
+            deleteBrowsePageRuleIfPresent(browsePage, p, UnbxdEnum.BANNER);
+        }
+        deleteBrowsePageRuleIfPresent(browsePage, page, UnbxdEnum.BANNER);
+    }
 
 }

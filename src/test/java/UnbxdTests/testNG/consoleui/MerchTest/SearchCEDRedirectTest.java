@@ -9,6 +9,7 @@ import lib.annotation.FileToTest;
 import lib.enums.UnbxdEnum;
 import lib.compat.Page;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -77,25 +78,14 @@ public class SearchCEDRedirectTest extends MerchandisingTest {
         searchPage.threadWait();
     }
 
+    @AfterClass(alwaysRun = true, groups = {"sanity"})
+    public void deleteCreatedRules() throws InterruptedException {
+        for (String q : new ArrayList<>(queryRules)) {
+            deleteSearchQueryRuleIfPresent(q, UnbxdEnum.REDIRECT);
+        }
+        deleteSearchQueryRuleIfPresent(query, UnbxdEnum.REDIRECT);
+    }
 
-
-//    @AfterClass(alwaysRun = true,groups={"sanity"})
-//    public void deleteCreatedRules() throws InterruptedException {
-//        goTo(searchPage);
-//        merchandisingActions.goToSection(UnbxdEnum.REDIRECT);
-//        for(String queryRule: queryRules)
-//        {
-//            if(searchPage.queryRuleByName(query)!=null)
-//            {
-//                searchPageActions.deleteQueryRule(queryRule);
-//                Assert.assertNull(searchPage.queryRuleByName(queryRule),"CREATED QUERY RULE IS NOT DELETED");
-//                getDriver().navigate().refresh();
-//                ThreadWait();
-//
-//
-//            }
-//        }
-//    }
 }
 
 

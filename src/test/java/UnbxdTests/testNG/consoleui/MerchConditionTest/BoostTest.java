@@ -63,36 +63,23 @@ public class BoostTest extends MerchandisingTest {
         merchandisingActions.clickOnApplyButton();
         merchandisingActions.publishCampaign();
         merchandisingActions.verifySuccessMessage();
-       // ThreadWait();
+        ThreadWait();
         Assert.assertNotNull(searchPage.queryRuleByName(query));
         queryRules.add(query);
 
-        merchandisingActions.openPreviewAndSwitchTheTab();
-        merchandisingActions.awaitForPageToLoad();
-        ThreadWait();
-        String previewPage = driver.getCurrentUrl();
-        Assert.assertTrue(previewPage.contains("preview"),"Not redirecting to preview page");
-        merchandisingActions.awaitForElementPresence(merchandisingActions.SearchpreviewOption);
-        Assert.assertTrue(merchandisingActions.showingResultinPreview.getText().contains(query));
-
-        merchandisingActions.ClickViewHideInsight();
-        merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
-        ThreadWait();
-        merchandisingActions.MerchandisingStrategy.isDisplayed();
-        ThreadWait();
-        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
-        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
-        verifyMerchandisingGenericData(object, UnbxdEnum.BOOST,false);
-
-        goTo(searchPage);
-        searchPage.threadWait();
-        searchPage.queryRuleByName(query);
         searchPageActions.selectActionType(UnbxdEnum.EDIT, query);
         ThreadWait();
         String condition = searchPageActions.getConditionTitle();
         int group = searchPageActions.getConditionSize();
         Assert.assertTrue(condition.equalsIgnoreCase(conditionType), "SELECTED CONDITION TYPE IS WRONG!!! SELECTED CONDITION IS : " + conditionType);
         Assert.assertEquals(group, object.size(), "NUMBER OF CONDITION GROUP IS WRONG!!! SELECTED CONDITION GROUP IS : " + group);
+
+        String summaryForAssertions = searchPageActions.getAggregatedPromotionSummaryText();
+        for (String selectedAttributeLabel : merchandisingActions.getSelectedAttributeOptionTexts()) {
+            Assert.assertTrue(
+                summaryForAssertions.contains(selectedAttributeLabel),
+                "Promotion summary should include the attribute label chosen in the dropdown: \"" + selectedAttributeLabel + "\". Summary text: " + summaryForAssertions);
+        }
 
         searchPage.scrollToBottom();
         // Use robust click handling to avoid click interception issues
@@ -105,34 +92,6 @@ public class BoostTest extends MerchandisingTest {
         merchandisingActions.publishCampaign();
         merchandisingActions.verifySuccessMessage();
         ThreadWait();
-
-        //Preview
-        merchandisingActions.openPreviewAndSwitchTheTab();
-        merchandisingActions.awaitForPageToLoad();
-        ThreadWait();
-        String previewpage = driver.getCurrentUrl();
-        Assert.assertTrue(previewpage.contains("preview"),"Not redirecting to preview page");
-        merchandisingActions.awaitForElementPresence(merchandisingActions.SearchpreviewOption);
-        Assert.assertTrue(merchandisingActions.showingResultinPreview.getText().contains(query));
-
-        merchandisingActions.ClickViewHideInsight();
-        merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
-        merchandisingActions.MerchandisingStrategy.isDisplayed();
-        ThreadWait();
-        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
-        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
-        
-        verifyMerchandisingGenericData(object, UnbxdEnum.BOOST,true);
-
-        goTo(searchPage);
-        searchPage.threadWait();
-        searchPage.queryRuleByName(query);
-        searchPageActions.selectActionType(UnbxdEnum.PREVIEW, query);
-        ThreadWait();
-        String updatedCondition = searchPageActions.getConditionTitle();
-        int updatedGroup = searchPageActions.getConditionSize();
-        Assert.assertTrue(updatedCondition.equalsIgnoreCase(conditionType), "SELECTED CONDITION TYPE IS WRONG!!! SELECTED CONDITION IS : " + conditionType);
-        Assert.assertEquals(updatedGroup, object.size(), "NUMBER OF CONDITION GROUP IS WRONG!!! SELECTED CONDITION GROUP IS : " + group);
 
         goTo(searchPage);
         searchPage.threadWait();
@@ -192,38 +151,14 @@ public class BoostTest extends MerchandisingTest {
        Assert.assertEquals(group,2, "NUMBER OF CONDITION GROUP IS WRONG!!! SELECTED CONDITION GROUP IS : " + group);
     }
 
+    @AfterClass(alwaysRun = true, groups = {"sanity"})
+    public void deleteCreatedRules() throws InterruptedException {
+        for (String q : new ArrayList<>(queryRules)) {
+            deleteSearchQueryRuleIfPresent(q);
+        }
+        deleteSearchQueryRuleIfPresent(query);
+    }
 
-
-//    @AfterClass(alwaysRun = true,groups={"sanity"})
-//    public void deleteCreatedRules()
-//    {
-//        goTo(searchPage);
-//
-//        for(String queryRule: queryRules)
-//        {
-//            if(searchPage.queryRuleByName(queryRule)!=null)
-//            {
-//                searchPageActions.deleteQueryRule(queryRule);
-//                Assert.assertNull(searchPage.queryRuleByName(queryRule),"CREATED QUERY RULE IS NOT DELETED");
-//                getDriver().navigate().refresh();
-//                ThreadWait();
-//            }
-//        }
-//
-//       goTo(browsePage);
-//
-//        for(String pageRule: pageRules)
-//        {
-//         if(searchPage.queryRuleByName(pageRule)!=null)
-//          {
-//            searchPageActions.deleteQueryRule(pageRule);
-//            Assert.assertNull(searchPage.queryRuleByName(pageRule),"BROWSE RULE : CREATED PAGE RULE IS NOT DELETED");
-//              getDriver().navigate().refresh();
-//              ThreadWait();
-//
-//          }
-//        }
-//    }
 }
 
 

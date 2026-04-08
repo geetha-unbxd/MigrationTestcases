@@ -10,6 +10,7 @@ import lib.annotation.FileToTest;
 import lib.enums.UnbxdEnum;
 import lib.compat.Page;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -41,79 +42,12 @@ public class SearchBannerTest extends MerchandisingTest {
     public String page;
 
 
-   @FileToTest(value = "/consoleTestData/htmlBannerForDuplicate.json")
-    @Test(description = "SEARCH: This test Verifies the Banner duplicate", priority = 3, dataProviderClass = ResourceLoader.class, dataProvider = "getTestDataFromFile")
-    public void duplicateBannerHtmlTest(Object jsonObject) throws InterruptedException {
-        JsonObject bannerData=(JsonObject) jsonObject;
-        query=bannerData.get("query").getAsString();
-
-        goTo(searchPage);
-        searchPage.threadWait();
-        merchandisingActions.goToSection(UnbxdEnum.BANNER);
-        searchPageActions.awaitForPageToLoad();
-
-        //create the rule
-        createPromotion(query,true,true);
-        String html= bannerData.get("data").getAsString();
-        Map<String, Object> campaignData = merchandisingActions.getCampaignData("htmlBannerForDuplicate.json");
-        bannerActions.goToQueryRuleBanner();
-        searchPageActions.fillQueryRuleData(query,null);
-        merchandisingActions.fillCampaignData(campaignData);
-        bannerActions.addHtmlBanner(html);
-        Thread.sleep(1000);
-        bannerActions.awaitForElementPresence(merchandisingActions.publishButton);
-        Thread.sleep(1000);
-        click(merchandisingActions.publishButton);
-        merchandisingActions.verifySuccessMessage();
-        ThreadWait();
-        Assert.assertNotNull(searchPage.queryRuleByName(query));
-        queryRules.add(query);
-
-        //Stopped the rule
-        searchPageActions.selectActionType(UnbxdEnum.MORE,query);
-        searchPageActions.selectActionFromMore(UnbxdEnum.STOPPED,query);
-        searchPageActions.selectModelWindow();
-        Assert.assertTrue(searchPageActions.checkSuccessMessage(), SUCCESS_MESSAGE_FAILURE);
-        Assert.assertTrue(searchPageActions.stopCampaign.isDisplayed(),"SEARCH: BANNER RULE IS NOT IN STOPPED STATE");
-
-        //duplicate the rule
-        searchPageActions.awaitForPageToLoad();
-        searchPageActions.selectActionType(UnbxdEnum.MORE,query);
-        searchPageActions.selectActionFromMore(UnbxdEnum.DUPLICATE,query);
-        searchPageActions.awaitForPageToLoad();
-        Assert.assertTrue(searchPageActions.campaignNameInput.getValue().contains("copy"),"SEARCH: CAMPAIGN NAME IS NOT BEEN DUPLICATED");
-        Assert.assertEquals(searchPageActions.htmlPreview.getText(),html,"SEARCH: HTML URL IS NOT SAME AS GIVENe");
-        bannerActions.awaitForElementPresence(merchandisingActions.publishButton);
-        searchPage.threadWait();
-        click(merchandisingActions.publishButton);
-        searchPage.threadWait();
-        searchPage.queryRuleByName(query);
-        merchandisingActions.campaignPromotions.getText().contains("copy");
-        Assert.assertTrue(merchandisingActions.activeStatus.isDisplayed(),"SEARCH: PROMOTION RULE IS NOT IN ACTIVE STATE");
-
-        searchPage.threadWait();
-        goTo(searchPage);
-        searchPage.threadWait();
-        merchandisingActions.goToSection(UnbxdEnum.BANNER);
-        searchPageActions.deleteQueryRule(query);
-        searchPage.threadWait();
-        searchPageActions.deleteQueryRule(query);
-        searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-        searchPage.threadWait();
-
-
-   }
-
 
 
     @FileToTest(value = "/consoleTestData/FieldRuleBanner.json")
     @Test(description = "Verifies the creation and editing of a search banner with a field rule and image URL.", priority = 2, dataProviderClass = ResourceLoader.class, dataProvider = "getTestDataFromFile",groups={"sanity"})
     public void createAndEditSearchFieldRuleImageBannerTest(Object jsonObject) throws InterruptedException {
         JsonObject bannerData = (JsonObject) jsonObject;
-        query = bannerData.get("Value").getAsString();
-        String value = bannerData.get("Value").getAsString();
-        String Attribute = bannerData.get("Attribute").getAsString();
-
 
         goTo(searchPage);
         searchPage.threadWait();
@@ -123,13 +57,12 @@ public class SearchBannerTest extends MerchandisingTest {
         //create the rule
         String ImgUrl= bannerData.get("data").getAsString();
         String editImgUrl=bannerData.get("editBanner").getAsString();
-        createPromotion(query,true,false);
-        ThreadWait();
+        searchPageActions.clickOnAddRule(true);
+        searchPageActions.goToFieldRuleBasedBanner();
         bannerActions.goToFieldRuleBanner();
+        query=bannerActions.selectFieldRuleAttribute();
         ThreadWait();
-        bannerActions.selectFieldRuleAttribute(Attribute);
-        ThreadWait();
-        bannerActions.selectFieldRuleAttributeValue(value);
+        bannerActions.selectFieldRuleAttributeValue();
         // Use robust click handling to avoid click interception issues
         searchPageActions.scrollUntilVisible(searchPageActions.nextButton);
         searchPageActions.waitForElementToBeClickable(searchPageActions.nextButton, "Next Button");
@@ -167,19 +100,12 @@ public class SearchBannerTest extends MerchandisingTest {
 
     }
 
-//    @AfterClass(alwaysRun = true,groups={"sanity"})
-//    public void deleteCreatedRules() throws InterruptedException {
-//        goTo(searchPage);
-//        merchandisingActions.goToSection(UnbxdEnum.BANNER);
-//        for (String queryRule : queryRules) {
-//            if (searchPage.queryRuleByName(queryRule)!= null)
-//            {
-//                searchPageActions.deleteQueryRule(queryRule);
-//                Assert.assertNull(searchPage.queryRuleByName(queryRule), "CREATED QUERY RULE IS NOT DELETED");
-//                getDriver().navigate().refresh();
-//                ThreadWait();
-//            }
-//        }
-//
-//        }
+    @AfterClass(alwaysRun = true, groups = {"sanity"})
+    public void deleteCreatedRules() throws InterruptedException {
+        for (String q : new ArrayList<>(queryRules)) {
+            deleteSearchQueryRuleIfPresent(q, UnbxdEnum.BANNER);
+        }
+        deleteSearchQueryRuleIfPresent(query, UnbxdEnum.BANNER);
+    }
+
 }

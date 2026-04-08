@@ -786,7 +786,8 @@ public class VariantLockAction extends VariantPage {
      * @param product Product card element
      * @return UniqueId value
      */
-    public String getUniqueIdFromPreview(FluentWebElement product) {
+    public String getUniqueIdFromPreview(FluentWebElement product) throws InterruptedException {
+        Thread.sleep(1000);
         FluentWebElement productUId = product.findFirst(".product-u-id");
         if (productUId != null && productUId.isDisplayed()) {
             return productUId.getText().trim();
@@ -892,7 +893,7 @@ public class VariantLockAction extends VariantPage {
      * @param product Product card element from preview
      * @return true if both UniqueId and VariantId match
      */
-    public boolean verifyUniqueIdAndVariantIdMatch(FluentWebElement product) {
+    public boolean verifyUniqueIdAndVariantIdMatch(FluentWebElement product) throws InterruptedException {
         String summaryUniqueId = getUniqueIdFromSummary();
         String summaryVariantId = getVariantIdFromSummary();
         String previewUniqueId = getUniqueIdFromPreview(product);

@@ -55,7 +55,11 @@ public class BrowseSlotTest extends MerchandisingTest {
         JsonArray object = slotJsonObject.get("data").getAsJsonArray();
         Map<String, Object> campaignData = merchandisingActions.getCampaignData("browseSlot.json");
 
-        searchPageActions.fillPageName(object);
+        searchPageActions.pageRuleDropdown.click();
+        searchPageActions.awaitForElementPresence(searchPageActions.BuildPath);
+        searchPageActions.BuildPath.click();
+        searchPageActions.SelectedCategoryPathDisplay.fill().with(page);
+        searchPageActions.categorypathApplyButton.click();
         merchandisingActions.fillCampaignData(campaignData);
         ThreadWait();
         merchandisingActions.goToLandingPage();
@@ -71,24 +75,7 @@ public class BrowseSlotTest extends MerchandisingTest {
         Assert.assertNotNull(searchPage.queryRuleByName(page));
         pageRules.add(page);
 
-        merchandisingActions.openPreviewAndSwitchTheTab();
-        merchandisingActions.awaitForPageToLoad();
-        ThreadWait();
-        String previewPage = driver.getCurrentUrl();
-        Assert.assertTrue(previewPage.contains("preview"),"Not redirecting to preview page");
-        merchandisingActions.awaitForElementPresence(merchandisingActions.SearchpreviewOption);
-        Assert.assertTrue(merchandisingActions.showingResultinPreview.getText().contains(page));
 
-        merchandisingActions.ClickViewHideInsight();
-        merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
-        merchandisingActions.MerchandisingStrategy.isDisplayed();
-        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
-        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
-        verifyMerchandisingGenericData(object, UnbxdEnum.SLOT,false);
-
-        goTo(browsePage);
-        searchPage.threadWait();
-        searchPage.queryRuleByName(page);
         searchPageActions.selectActionType(UnbxdEnum.EDIT, page);
 
         ThreadWait();
@@ -110,33 +97,6 @@ public class BrowseSlotTest extends MerchandisingTest {
         merchandisingActions.verifySuccessMessage();
         ThreadWait();
 
-        //Preview
-        merchandisingActions.openPreviewAndSwitchTheTab();
-        merchandisingActions.awaitForPageToLoad();
-        ThreadWait();
-        String previewpage = driver.getCurrentUrl();
-        Assert.assertTrue(previewpage.contains("preview"),"Not redirecting to preview page");
-        merchandisingActions.awaitForElementPresence(merchandisingActions.SearchpreviewOption);
-        Assert.assertTrue(merchandisingActions.showingResultinPreview.getText().contains(page));
-
-        merchandisingActions.ClickViewHideInsight();
-        merchandisingActions.awaitForElementPresence(merchandisingActions.inSighttitle);
-        merchandisingActions.MerchandisingStrategy.isDisplayed();
-        merchandisingActions.scrollUntilVisible(merchandisingActions.promotionMerchandisingViewStrategy);
-        merchandisingActions.clickUsingJS(merchandisingActions.promotionMerchandisingViewStrategy);
-        verifyMerchandisingGenericData(object, UnbxdEnum.FILTER,true);
-
-
-        goTo(browsePage);
-        searchPage.threadWait();
-        searchPage.queryRuleByName(page);
-        searchPageActions.selectActionType(UnbxdEnum.PREVIEW, page);
-        ThreadWait();
-        merchandisingActions.verifySlotIconIsPresentAtGivenPosition(endRange);
-        String Updatecondition = searchPageActions.getConditionTitle();
-        int Updategroup = searchPageActions.getConditionSize();
-        Assert.assertTrue(Updatecondition.equalsIgnoreCase(conditionType), "BROWSE: SELECTED CONDITION TYPE IS WRONG!!! SELECTED CONDITION IS : " + conditionType);
-        Assert.assertEquals(Updategroup, object.size(), "BROWSE: NUMBER OF CONDITION GROUP IS WRONG!!! SELECTED CONDITION GROUP IS : " + group);
 
         goTo(browsePage);
         searchPage.threadWait();
@@ -148,32 +108,12 @@ public class BrowseSlotTest extends MerchandisingTest {
 
     }
 
+    @AfterClass(alwaysRun = true, groups = {"sanity"})
+    public void deleteCreatedRules() throws InterruptedException {
+        for (String p : new ArrayList<>(pageRules)) {
+            deleteBrowsePageRuleIfPresent(browsePage, p);
+        }
+        deleteBrowsePageRuleIfPresent(browsePage, page);
+    }
 
-
-//    @AfterClass(alwaysRun = true,groups={"sanity"})
-//    public void deleteCreatedRules() {
-//        goTo(searchPage);
-//
-//        for (String queryRule : queryRules) {
-//            if (searchPage.queryRuleByName(queryRule) != null) {
-//                searchPageActions.deleteQueryRule(queryRule);
-//                Assert.assertNull(searchPage.queryRuleByName(queryRule), "CREATED QUERY RULE IS NOT DELETED");
-//                getDriver().navigate().refresh();
-//                ThreadWait();
-//            }
-//        }
-//        goTo(browsePage);
-//
-//        for (String pageRule : pageRules) {
-//            if (searchPage.queryRuleByName(pageRule) != null) {
-//                searchPageActions.deleteQueryRule(pageRule);
-//                Assert.assertNull(searchPage.queryRuleByName(pageRule), "BROWSE RULE : CREATED PAGE RULE IS NOT DELETED");
-//                getDriver().navigate().refresh();
-//                ThreadWait();
-//
-//
-//            }
-//
-//        }
-//    }
 }

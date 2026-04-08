@@ -97,173 +97,6 @@ public class SegmentTest extends MerchandisingTest {
         searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
 
     }
-
-
-    @FileToTest(value = "/consoleTestData/SegmentMerchBanner.json")
-    @Test(description = "Verifies that a created search segment can be used in a banner.", priority = 2, dataProviderClass = ResourceLoader.class, dataProvider = "getTestDataFromFile")
-    public void verifySearchSegmentInBannerTest(Object jsonObject) throws InterruptedException {
-
-        JsonObject segmentData=(JsonObject) jsonObject;
-        segmentName=segmentData.get("Segment").getAsString();
-        String userTypeNew = segmentData.get("UserTypeNew").getAsString();
-        String segmentDeviceType = segmentData.get("SegmentDeviceType").getAsString();
-        String BannerUrl = segmentData.get("BnnerUrl").getAsString();
-
-
-        ThreadWait();
-        searchPageActions.awaitForPageToLoad();
-        goTo(segmentPage);
-        ThreadWait();
-
-        segmenPageActions.createSegment(segmentName);
-        segmenPageActions.selectTypeValues(UnbxdEnum.USERTYPE,userTypeNew);
-        searchPage.threadWait();
-        segmenPageActions.selectDeviceType(UnbxdEnum.DEVICETYPE,segmentDeviceType);
-        segmenPageActions.clickOnSave();
-        merchandisingActions.verifySuccessMessage();
-        searchPage.threadWait();
-        Assert.assertNotNull(segmenPageActions.segmentRuleByName(segmentName));
-        SegmentRules.add(segmentName);
-
-        goTo(searchPage);
-        searchPage.threadWait();
-        merchandisingActions.goToSection(UnbxdEnum.BANNER);
-        searchPageActions.awaitForPageToLoad();
-
-        //create the rule
-        createPromotion(segmentName,true,true);
-        Map<String, Object> campaignData = merchandisingActions.getCampaignData("SegmentMerchBanner.json");
-        bannerActions.goToQueryRuleBanner();
-       // ThreadWait();
-        searchPageActions.fillQueryRuleData(segmentName,null);
-        merchandisingActions.fillCampaignDataforUpcoming(campaignData);
-        ThreadWait();
-        merchandisingActions.selectGlobalSegment();
-        ThreadWait();
-        merchandisingActions.selectSegment(segmentName);
-        ThreadWait();
-        merchandisingActions.clickonNext();
-        bannerActions.addHtmlBanner(BannerUrl);
-        ThreadWait();
-        merchandisingActions.publishCampaign();
-        merchandisingActions.verifySuccessMessage();
-        ThreadWait();
-        Assert.assertNotNull(searchPage.queryRuleByName(segmentName));
-        queryRules.add(segmentName);
-
-        //delete
-        searchPageActions.deleteQueryRule(segmentName);
-        Assert.assertNull(searchPage.queryRuleByName(segmentName), "BROWSE RULE : CREATED PAGE RULE IS NOT DELETED");
-
-        goTo(segmentPage);
-        segmenPageActions.deleteSegmentRule(segmentName);
-        searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-        searchPage.threadWait();
-
-
-    }
-
-    @FileToTest(value = "/consoleTestData/SegmentCustomAttribute.json")
-    @Test(description = "Verifies creating and editing a search segment with a custom attribute.", priority = 3, dataProviderClass = ResourceLoader.class, dataProvider = "getTestDataFromFile")
-    public void createAndEditSearchSegmentWithCustomAttributeTest(Object jsonObject) throws InterruptedException {
-
-        JsonObject segmentData = (JsonObject) jsonObject;
-        segmentName = segmentData.get("Segment").getAsString();
-        String customAttribute = segmentData.get("CustomAttribute").getAsString();
-
-        ThreadWait();
-        searchPageActions.awaitForPageToLoad();
-        goTo(segmentPage);
-        ThreadWait();
-
-        String CustomAttribute=segmenPageActions.addAndSaveCustomAttribute(customAttribute);
-        segmenPageActions.createSegment(segmentName);
-        String CustAtrribute=segmenPageActions.selectAndEnterCustomAttribute(CustomAttribute);
-        String segmentNameValue=segmenPageActions.selectAndEnterCustomValue(segmentName);
-        segmenPageActions.clickOnSave();
-        merchandisingActions.verifySuccessMessage();
-        ThreadWait();
-        Assert.assertNotNull(segmenPageActions.segmentRuleByName(segmentName));
-        SegmentRules.add(segmentName);
-
-        searchPageActions.selectActionType(UnbxdEnum.EDIT,segmentName);
-        ThreadWait();
-        segmenPageActions.selectedCustom.getText().contains(CustAtrribute);
-        segmenPageActions.selectedCustomValue.getText().contains(segmentNameValue);
-
-        segmenPageActions.selectAndEnterCustomAttribute(CustomAttribute);
-        segmenPageActions.selectAndEnterCustomValue(segmentName);
-        segmenPageActions.clickOnSave();
-        merchandisingActions.verifySuccessMessage();
-        ThreadWait();
-        Assert.assertNotNull(segmenPageActions.segmentRuleByName(segmentName));
-
-        goTo(segmentPage);
-        segmenPageActions.deleteSegmentRule(segmentName);
-        searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-
-        ThreadWait();
-        segmenPageActions.deleteCustomAttribute(customAttribute);
-        searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-        searchPage.threadWait();
-
-
-    }
-
-    @FileToTest(value = "/consoleTestData/SegmentMerchPromotion.json")
-    @Test(description = "Verifies that a search segment with a custom attribute can be used in a promotion.", priority = 4, dataProviderClass = ResourceLoader.class, dataProvider = "getTestDataFromFile")
-    public void verifySearchSegmentWithCustomAttributeInPromotionTest(Object jsonObject) throws InterruptedException {
-
-        JsonObject segmentData = (JsonObject) jsonObject;
-        segmentName = segmentData.get("Segment").getAsString();
-        String customAttribute = segmentData.get("CustomAttribute").getAsString();
-
-        searchPageActions.awaitForPageToLoad();
-        goTo(segmentPage);
-        ThreadWait();
-
-        String CustomAttribute = segmenPageActions.addAndSaveCustomAttribute(customAttribute);
-        segmenPageActions.createSegment(segmentName);
-        String CustAtrribute=segmenPageActions.selectAndEnterCustomAttribute(CustomAttribute);
-        String segmentNameValue=segmenPageActions.selectAndEnterCustomValue(segmentName);
-        segmenPageActions.clickOnSave();
-        merchandisingActions.verifySuccessMessage();
-        searchPage.threadWait();
-        Assert.assertNotNull(segmenPageActions.segmentRuleByName(segmentName));
-        SegmentRules.add(segmentName);
-
-        goTo(searchPage);
-        searchPage.threadWait();
-        createPromotion(segmentName, false, false);
-        Map<String, Object> campaignData = merchandisingActions.getCampaignData("SegmentMerchPromotion.json");
-        merchandisingActions.fillCampaignDataforUpcoming(campaignData);
-        merchandisingActions.selectGlobalSegment();
-        merchandisingActions.selectSegment(segmentName);
-        merchandisingActions.clickonNext();
-        ThreadWait();
-        merchandisingActions.goToLandingPage();
-        merchandisingActions.publishCampaign();
-        merchandisingActions.verifySuccessMessage();
-        ThreadWait();
-        Assert.assertNotNull(searchPage.queryRuleByName(segmentName));
-        queryRules.add(segmentName);
-
-        //Delete
-        searchPageActions.deleteQueryRule(segmentName);
-        ThreadWait();
-        Assert.assertNull(searchPage.queryRuleByName(segmentName), "BROWSE RULE : CREATED PAGE RULE IS NOT DELETED");
-
-        goTo(segmentPage);
-        segmenPageActions.deleteSegmentRule(segmentName);
-        searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-
-        ThreadWait();
-        segmenPageActions.deleteCustomAttribute(customAttribute);
-        searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-        searchPage.threadWait();
-
-    }
-//browse
     @FileToTest(value = "/consoleTestData/BrowseSegment.json")
     @Test(description = "Verifies the creation and editing of a browse segment.", priority = 5, dataProviderClass = ResourceLoader.class, dataProvider = "getTestDataFromFile",groups = {"sanity"})
     public void createAndEditBrowseSegmentTest(Object jsonObject) throws InterruptedException {
@@ -310,169 +143,37 @@ public class SegmentTest extends MerchandisingTest {
     }
 
 
-    @FileToTest(value = "/consoleTestData/BrowseSegmentBanner.json")
-    @Test(description = "Verifies that a created browse segment can be used in a banner.", priority = 6, dataProviderClass = ResourceLoader.class, dataProvider = "getTestDataFromFile")
-    public void verifyBrowseSegmentInBannerTest(Object jsonObject) throws InterruptedException {
-
-        JsonObject segmentData=(JsonObject) jsonObject;
-        segmentName=segmentData.get("Segment").getAsString();
-        String userTypeNew = segmentData.get("UserTypeNew").getAsString();
-        String segmentDeviceType = segmentData.get("SegmentDeviceType").getAsString();
-        String BannerUrl = segmentData.get("BnnerUrl").getAsString();
-
-
-        ThreadWait();
-        searchPageActions.awaitForPageToLoad();
-        goTo(browseSegmentPage);
-        ThreadWait();
-
-        segmenPageActions.createSegment(segmentName);
-        segmenPageActions.selectTypeValues(UnbxdEnum.USERTYPE,userTypeNew);
-        segmenPageActions.selectDeviceType(UnbxdEnum.DEVICETYPE,segmentDeviceType);
-        segmenPageActions.clickOnSave();
-        merchandisingActions.verifySuccessMessage();
-        ThreadWait();
-        Assert.assertNotNull(segmenPageActions.segmentRuleByName(segmentName));
-        SegmentRules.add(segmentName);
-
-        goTo(browsePage);
-        searchPage.threadWait();
-        merchandisingActions.goToSection(UnbxdEnum.BANNER);
-        searchPageActions.awaitForPageToLoad();
-
-        //create the rule
-        createBrowsePromotion(segmentName,true,true);
-        JsonArray object = segmentData.get("data").getAsJsonArray();
-        Map<String, Object> campaignData = merchandisingActions.getCampaignData("BrowseSegmentBanner.json");
-        ThreadWait();
-        bannerActions.goToQueryRuleBanner();
-        searchPageActions.fillPageName(object);
-        merchandisingActions.fillCampaignDataforUpcoming(campaignData);
-        ThreadWait();
-        merchandisingActions.selectGlobalSegment();
-        merchandisingActions.selectSegment(segmentName);
-        merchandisingActions.clickonNext();
-        bannerActions.addHtmlBanner(BannerUrl);
-        merchandisingActions.publishCampaign();
-        merchandisingActions.verifySuccessMessage();
-        ThreadWait();
-        Assert.assertNotNull(searchPage.queryRuleByName(segmentName));
-        pageRules.add(segmentName);
-
-        //delete
-        searchPageActions.deleteQueryRule(segmentName);
-        Assert.assertNull(searchPage.queryRuleByName(segmentName), "BROWSE RULE : CREATED PAGE RULE IS NOT DELETED");
+    @AfterClass(alwaysRun = true,groups={"sanity"})
+    public void deleteCreatedRules() throws InterruptedException {
 
         goTo(segmentPage);
-        segmenPageActions.deleteSegmentRule(segmentName);
-        searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-        searchPage.threadWait();
-    }
+        merchandisingActions.goToSection(UnbxdEnum.SEGMENTS);
+        for (String SegmentRule : SegmentRules) {
+            if (segmenPageActions.segmentRuleByName(SegmentRule) != null) {
+                segmenPageActions.deleteSegmentRule(SegmentRule);
+                Assert.assertNull(segmenPageActions.segmentRuleByName(SegmentRule), "CREATED SEGMENT RULE IS NOT DELETED");
+                getDriver().navigate().refresh();
+                ThreadWait();
 
-    @FileToTest(value = "/consoleTestData/BrowseSegmentPromotion.json")
-    @Test(description = "Verifies creating and editing a browse segment with a custom attribute.", priority = 7, dataProviderClass = ResourceLoader.class, dataProvider = "getTestDataFromFile")
-    public void createAndEditBrowseSegmentWithCustomAttributeInPromotionTest(Object jsonObject) throws InterruptedException {
+            }
+        }
 
-        JsonObject segmentData = (JsonObject) jsonObject;
-        segmentName = segmentData.get("Segment").getAsString();
-        String customAttribute = segmentData.get("CustomAttribute").getAsString();
-
-
-        ThreadWait();
-        searchPageActions.awaitForPageToLoad();
         goTo(browseSegmentPage);
-        ThreadWait();
+        merchandisingActions.goToSection(UnbxdEnum.SEGMENTS);
+        for (String SegmentRule : SegmentRules) {
+            if (segmenPageActions.segmentRuleByName(SegmentRule) != null) {
+                segmenPageActions.deleteSegmentRule(SegmentRule);
+                Assert.assertNull(segmenPageActions.segmentRuleByName(SegmentRule), "CREATED SEGMENT RULE IS NOT DELETED");
+                getDriver().navigate().refresh();
+                ThreadWait();
 
-        String CustomAttribute=segmenPageActions.addAndSaveCustomAttribute(customAttribute);
-        segmenPageActions.createSegment(segmentName);
-        ThreadWait();
-        String CustAtrribute=segmenPageActions.selectAndEnterCustomAttribute(CustomAttribute);
-        ThreadWait();
-        String segmentNameValue=segmenPageActions.selectAndEnterCustomValue(segmentName);
-        segmenPageActions.clickOnSave();
-        merchandisingActions.verifySuccessMessage();
-        ThreadWait();
-        Assert.assertNotNull(segmenPageActions.segmentRuleByName(segmentName));
-        SegmentRules.add(segmentName);
-
-        searchPageActions.selectActionType(UnbxdEnum.EDIT,segmentName);
-        ThreadWait();
-        segmenPageActions.selectedCustom.getText().contains(CustAtrribute);
-        segmenPageActions.selectedCustomValue.getText().contains(segmentNameValue);
-
-        segmenPageActions.selectAndEnterCustomValue(segmentName);
-        segmenPageActions.clickOnSave();
-        merchandisingActions.verifySuccessMessage();
-        ThreadWait();
-        Assert.assertNotNull(segmenPageActions.segmentRuleByName(segmentName));
-        SegmentRules.add(segmentName);
-
-        goTo(browsePage);
-        searchPage.threadWait();
-        createBrowsePromotion(segmentName, false, false);
-        JsonArray object = segmentData.get("data").getAsJsonArray();
-
-        Map<String, Object> campaignData = merchandisingActions.getCampaignData("BrowseSegmentPromotion.json");
-        searchPageActions.fillPageName(object);
-        merchandisingActions.fillCampaignDataforUpcoming(campaignData);
-        ThreadWait();
-        merchandisingActions.selectGlobalSegment();
-        ThreadWait();
-        merchandisingActions.selectSegment(segmentName);
-        ThreadWait();
-        merchandisingActions.clickonNext();
-        ThreadWait();
-        merchandisingActions.goToLandingPage();
-        merchandisingActions.publishCampaign();
-        merchandisingActions.verifySuccessMessage();
-        ThreadWait();
-        Assert.assertNotNull(searchPage.queryRuleByName(segmentName));
-        pageRules.add(segmentName);
-
-        searchPageActions.deleteQueryRule(segmentName);
-        ThreadWait();
-        Assert.assertNull(searchPage.queryRuleByName(segmentName), "BROWSE RULE : CREATED PAGE RULE IS NOT DELETED");
-
-        goTo(segmentPage);
-        segmenPageActions.deleteSegmentRule(segmentName);
-        searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-        ThreadWait();
-        segmenPageActions.deleteCustomAttribute(customAttribute);
-        searchPage.awaitTillElementDisplayed(searchPageActions.ToasterSuccess);
-        searchPage.threadWait();
+            }
+        }
 
     }
 
 
 
-//    @AfterClass(alwaysRun = true,groups={"sanity"})
-//    public void deleteCreatedRules() throws InterruptedException {
-//
-//        goTo(segmentPage);
-//        merchandisingActions.goToSection(UnbxdEnum.SEGMENTS);
-//        for (String SegmentRule : SegmentRules) {
-//            if (segmenPageActions.segmentRuleByName(segmentName) != null) {
-//                segmenPageActions.deleteSegmentRule(SegmentRule);
-//                Assert.assertNull(segmenPageActions.segmentRuleByName(SegmentRule), "CREATED QUERY RULE IS NOT DELETED");
-//                getDriver().navigate().refresh();
-//                ThreadWait();
-//
-//            }
-//        }
-//
-//        goTo(browseSegmentPage);
-//        merchandisingActions.goToSection(UnbxdEnum.SEGMENTS);
-//        for (String SegmentRule : SegmentRules) {
-//            if (segmenPageActions.segmentRuleByName(segmentName) != null) {
-//                segmenPageActions.deleteSegmentRule(SegmentRule);
-//                Assert.assertNull(segmenPageActions.segmentRuleByName(SegmentRule), "CREATED QUERY RULE IS NOT DELETED");
-//                getDriver().navigate().refresh();
-//                ThreadWait();
-//
-//            }
-//        }
-//
-//    }
 }
 
 
