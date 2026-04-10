@@ -15,8 +15,8 @@ pipeline {
         )
         string(
             name: 'SUITE_FILE',
-            defaultValue: 'src/test/resources/testNG/MerchandizingTestcases.xml',
-            description: 'Suite XML to run'
+            defaultValue: 'src/test/resources/testNG/Migration.xml',
+            description: 'Suite XML path under the repo (only Migration.xml is bundled; override if you add another suite file)'
         )
         booleanParam(
             name: 'TRIGGER_NEXT',
