@@ -10,14 +10,18 @@ Copy `.env.example` to `.env` and set:
 - `GOOGLE_PASSWORD` - Password
 - `TOTP_SECRET` - TOTP secret from your authenticator app
 
-## 2. Install dependencies
+## 2. Node version (CI / Jenkins)
+
+Use **Node 16+** on the agent (18 LTS recommended). Older Node versions may not support ES modules features used by dependencies. The export script avoids top-level `await` so it parses on Node 12+, but **Puppeteer 24** still needs a current runtime.
+
+## 3. Install dependencies
 
 ```bash
 cd console-login
 npm install
 ```
 
-## 3. Run
+## 4. Run
 
 ```bash
 cd console-login
