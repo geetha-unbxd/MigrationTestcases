@@ -1,5 +1,5 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="Migration" parallel="tests" thread-count="41" verbose="10" preserve-order="true">
+<suite name="Migration" parallel="tests" thread-count="3" verbose="10" preserve-order="true">
 
     <!-- ABTest -->
     <test name="Migration - ABTest - abCreateAndPreviewTest">

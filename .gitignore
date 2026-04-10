@@ -49,6 +49,10 @@ cookies.dat
 *.tmp
 *.bak
 
+# Console Google login automation
+console-login/node_modules/
+console-login/.env
+console-login/.console-session.json
 
 
 

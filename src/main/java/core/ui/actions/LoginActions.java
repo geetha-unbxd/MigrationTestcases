@@ -1,16 +1,12 @@
 package core.ui.actions;
 
 import core.ui.page.WelcomePage;
+import lib.ConsoleCredentialsHelper;
+import lib.ConsoleGoogleLoginHelper;
 import lib.EnvironmentConfig;
 import lib.UrlMapper;
-import lib.compat.FluentWebElement;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
 import org.testng.Assert;
-
-import java.io.Serializable;
-import java.util.Map;
-
 
 public class LoginActions extends WelcomePage {
 
@@ -32,22 +28,31 @@ public class LoginActions extends WelcomePage {
 
     public void unbxdLogin(int siteId,int userId)
     {
+        EnvironmentConfig.setContext(userId,siteId);
+        if (ConsoleCredentialsHelper.isConsoleGoogleLoginEnabled()) {
+            performGoogleLoginOrFail();
+            return;
+        }
         goTo("https://console.unbxd.io/unbxdlogin");
         click(unbxdLoginButton);
-        EnvironmentConfig.setContext(userId,siteId);
-        String email, password;
-        email= EnvironmentConfig.getEmail();
-        password=EnvironmentConfig.getPassword();
+        String email = EnvironmentConfig.getEmail();
+        String password = EnvironmentConfig.getPassword();
         loginWithUnbxd(email,password);
 
     }
 
+    @Override
     public String getUrl(){
 //        return UrlMapper.LOGIN.getUrlPath();
         return UrlMapper.LOGIN.getUrlPathFromAppUrl(EnvironmentConfig.getLoginUrl());
     }
 
     private void loginWith(String email,String pwd) {
+        if (ConsoleCredentialsHelper.isConsoleGoogleLoginEnabled()) {
+            performGoogleLoginOrFail();
+            return;
+        }
+
         goTo(this);
         awaitForPageToLoadQuick();
         Assert.assertTrue(awaitForElementPresence(loginTitle), "Login page is not yet loaded");
@@ -71,6 +76,30 @@ public class LoginActions extends WelcomePage {
                 System.out.println("Login is not working!!! The reason is " + getErrorMessageInLogin.getText());
             }
             Assert.fail("Login failed - still on login page: " + currentUrl);
+        }
+    }
+
+    /**
+     * When {@link ConsoleCredentialsHelper#isConsoleGoogleLoginEnabled()} is true, login is Google-only
+     * (Node + cookies). There is no fallback to email/password forms.
+     */
+    private void performGoogleLoginOrFail() {
+        if (!ConsoleCredentialsHelper.hasGoogleCredentials()) {
+            Assert.fail("Console Google login is enabled but GOOGLE_EMAIL / GOOGLE_PASSWORD are missing. "
+                    + "Set them in console-login/.env, or disable Google login with USE_CONSOLE_GOOGLE_LOGIN=false "
+                    + "(-Duse.console.google.login=false) to use YAML form login.");
+        }
+        String targetUrl = EnvironmentConfig.getApplicationUrl();
+        if (targetUrl == null || targetUrl.isBlank()) {
+            targetUrl = EnvironmentConfig.getLoginUrl();
+        }
+        try {
+            boolean ok = ConsoleGoogleLoginHelper.loginAndInjectCookies(getDriver(), targetUrl);
+            Assert.assertTrue(ok, "Google login did not establish a session (still on login URL).");
+        } catch (AssertionError e) {
+            throw e;
+        } catch (Exception e) {
+            Assert.fail("Google login failed: " + e.getMessage(), e);
         }
     }
 

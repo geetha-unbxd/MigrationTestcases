@@ -1,3 +1,6 @@
+// Console UI suites: add Jenkins "Secret text" credentials with IDs GOOGLE_EMAIL, GOOGLE_PASSWORD,
+// TOTP_SECRET (same IDs as in withCredentials below). The build agent needs Node.js on PATH and
+// dependencies installed under console-login/ (e.g. npm ci --prefix console-login) so Java can run export-console-login.js.
 pipeline {
     agent any
     environment {
@@ -44,11 +47,37 @@ pipeline {
                     } else if (env.JOB_NAME == 'SS_BulkUploadTest') {
                         suiteToRun = 'src/test/resources/testNG/BulkUploadTest.xml'
                     }
-                    echo "Running tests on ENV: ${params.ENV} | Suite: ${suiteToRun}"
-                    int mvnStatus = sh(
-                        script: "mvn clean test -P${params.ENV} -Denv.profile=${params.ENV} -DhubUrl=${SELENIUM_GRID_URL} -DsuiteXmlFile=${suiteToRun} -Dlistener=core.reporting.ExtentTestNGITestListener,core.AnnotationTransformer",
-                        returnStatus: true
+                    // Console UI suites use Node/Puppeteer Google login — inject secrets from Jenkins (not from repo .env).
+                    def isConsole = (
+                        suiteToRun.toLowerCase().contains('migration') ||
+                        suiteToRun.toLowerCase().contains('console') ||
+                        suiteToRun.toLowerCase().contains('merchandizing') ||
+                        suiteToRun == 'testng-console.xml' ||
+                        suiteToRun == 'testng-console-ui.xml' ||
+                        suiteToRun.endsWith('/testng-console.xml') ||
+                        suiteToRun.endsWith('/testng-console-ui.xml')
                     )
+                    echo "Running tests on ENV: ${params.ENV} | Suite: ${suiteToRun} | Console Google login: ${isConsole}"
+                    def mvnCmd = "mvn clean test -P${params.ENV} -Denv.profile=${params.ENV} -DhubUrl=${env.SELENIUM_GRID_URL} -DsuiteXmlFile=${suiteToRun} -Dlistener=core.reporting.ExtentTestNGITestListener,core.AnnotationTransformer"
+                    int mvnStatus
+                    if (isConsole) {
+                        withCredentials([
+                            string(credentialsId: 'GOOGLE_EMAIL', variable: 'GOOGLE_EMAIL'),
+                            string(credentialsId: 'GOOGLE_PASSWORD', variable: 'GOOGLE_PASSWORD'),
+                            string(credentialsId: 'TOTP_SECRET', variable: 'TOTP_SECRET')
+                        ]) {
+                            mvnStatus = sh(
+                                script: """
+                                    export HEADLESS=true
+                                    export USE_CONSOLE_GOOGLE_LOGIN=true
+                                    ${mvnCmd}
+                                """,
+                                returnStatus: true
+                            )
+                        }
+                    } else {
+                        mvnStatus = sh(script: mvnCmd, returnStatus: true)
+                    }
                     if (mvnStatus != 0) currentBuild.result = 'FAILURE'
                     def sourcePath = fileExists('extent.html') ? 'extent.html' :
                                      fileExists('test-output/ExtentReport.html') ? 'test-output/ExtentReport.html' : ''

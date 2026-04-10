@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="SingleTest" verbose="2">
+    <test name="ABTest_abCreateAndPreviewTest">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.ABTest.ABTest">
+                <methods>
+                    <include name="abCreateAndPreviewTest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>

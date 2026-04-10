@@ -58,7 +58,11 @@ public class ABTest extends MerchandisingTest {
         Map<String, Object> campaignData = merchandisingActions.getCampaignData("ABboost.json");
 
 
-        searchPageActions.fillPageName(object);
+        searchPageActions.pageRuleDropdown.click();
+        searchPageActions.awaitForElementPresence(searchPageActions.BuildPath);
+        searchPageActions.BuildPath.click();
+        searchPageActions.SelectedCategoryPathDisplay.fill().with(page);
+        searchPageActions.categorypathApplyButton.click();
         merchandisingActions.fillCampaignData(campaignData);
         ThreadWait();
         merchandisingActions.goToLandingPage();
