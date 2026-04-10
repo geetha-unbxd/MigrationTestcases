@@ -1,6 +1,6 @@
 // Console UI suites: add Jenkins "Secret text" credentials with IDs GOOGLE_EMAIL, GOOGLE_PASSWORD,
-// TOTP_SECRET (same IDs as in withCredentials below). The build agent needs Node.js on PATH and
-// dependencies installed under console-login/ (e.g. npm ci --prefix console-login) so Java can run export-console-login.js.
+// TOTP_SECRET (same IDs as in withCredentials below). The build agent needs Node.js + npm on PATH.
+// For console suites we run npm ci/install under console-login/ before mvn (node_modules is not in git).
 pipeline {
     agent any
     environment {
@@ -68,6 +68,12 @@ pipeline {
                         ]) {
                             mvnStatus = sh(
                                 script: """
+                                    set -e
+                                    if [ -f console-login/package-lock.json ]; then
+                                        npm ci --prefix console-login
+                                    else
+                                        npm install --prefix console-login
+                                    fi
                                     export HEADLESS=true
                                     export USE_CONSOLE_GOOGLE_LOGIN=true
                                     ${mvnCmd}
