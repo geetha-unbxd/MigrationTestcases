@@ -1,6 +1,7 @@
 // Console UI suites: add Jenkins "Secret text" credentials with IDs GOOGLE_EMAIL, GOOGLE_PASSWORD,
-// TOTP_SECRET (same IDs as in withCredentials below). The build agent needs Node.js + npm on PATH.
-// For console suites we run npm ci/install under console-login/ before mvn (node_modules is not in git).
+// TOTP_SECRET (same IDs as in withCredentials below). Puppeteer 24 needs Node.js 18+ for npm install.
+// Use optional NODEJS_TOOL (Global Tool: NodeJS) or rely on node>=18 on PATH; otherwise we bootstrap
+// Node 18.20.4 under workspace .jenkins-tools/ (Linux/mac).
 pipeline {
     agent any
     environment {
@@ -22,6 +23,11 @@ pipeline {
             name: 'TRIGGER_NEXT',
             defaultValue: false,
             description: 'Trigger downstream jobs automatically'
+        )
+        string(
+            name: 'NODEJS_TOOL',
+            defaultValue: '',
+            description: 'Optional: Jenkins Global Tool name for Node 18+ (Manage Jenkins → Tools → NodeJS). Leave empty to use PATH or auto-download Node 18.20.4.'
         )
     }
     stages {
@@ -61,6 +67,17 @@ pipeline {
                     def mvnCmd = "mvn clean test -P${params.ENV} -Denv.profile=${params.ENV} -DhubUrl=${env.SELENIUM_GRID_URL} -DsuiteXmlFile=${suiteToRun} -Dlistener=core.reporting.ExtentTestNGITestListener,core.AnnotationTransformer"
                     int mvnStatus
                     if (isConsole) {
+                        def nodePrep = ''
+                        def nodeToolName = params.NODEJS_TOOL != null ? params.NODEJS_TOOL.toString().trim() : ''
+                        if (nodeToolName) {
+                            try {
+                                def nh = tool name: nodeToolName, type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
+                                nodePrep = "export PATH=\"${nh}/bin:\$PATH\"\n"
+                                echo "Using Jenkins NodeJS tool: ${nh}"
+                            } catch (Exception e) {
+                                echo "NODEJS_TOOL '${nodeToolName}' unavailable (${e.message}); using PATH or Node bootstrap."
+                            }
+                        }
                         withCredentials([
                             string(credentialsId: 'GOOGLE_EMAIL', variable: 'GOOGLE_EMAIL'),
                             string(credentialsId: 'GOOGLE_PASSWORD', variable: 'GOOGLE_PASSWORD'),
@@ -69,6 +86,43 @@ pipeline {
                             mvnStatus = sh(
                                 script: """
                                     set -e
+                                    ${nodePrep}
+                                    ensure_node_18() {
+                                      if command -v node >/dev/null 2>&1; then
+                                        NVER=\$(node -p "parseInt(process.versions.node.split('.')[0],10)" 2>/dev/null || echo 0)
+                                        if [ "\$NVER" -ge 18 ] 2>/dev/null; then
+                                          echo "Using node on PATH: \$(command -v node) (\$(node -v))"
+                                          return 0
+                                        fi
+                                        echo "Node on PATH is too old (\$(node -v 2>/dev/null || echo none)); bootstrapping Node 18..."
+                                      else
+                                        echo "No node on PATH; bootstrapping Node 18..."
+                                      fi
+                                      NODEV=18.20.4
+                                      OS=\$(uname -s)
+                                      ARCH=\$(uname -m)
+                                      case "\${OS}:\${ARCH}" in
+                                        Linux:x86_64) DISTRO=linux-x64 ;;
+                                        Linux:aarch64|Linux:arm64) DISTRO=linux-arm64 ;;
+                                        Darwin:x86_64) DISTRO=darwin-x64 ;;
+                                        Darwin:arm64) DISTRO=darwin-arm64 ;;
+                                        *) echo "Cannot bootstrap Node 18: OS=\$OS ARCH=\$ARCH"; exit 1 ;;
+                                      esac
+                                      NROOT="\$WORKSPACE/.jenkins-tools/node-v\${NODEV}-\${DISTRO}"
+                                      mkdir -p "\$WORKSPACE/.jenkins-tools"
+                                      if [ ! -x "\${NROOT}/bin/node" ]; then
+                                        TMP=\$(mktemp -d)
+                                        curl -fsSL "https://nodejs.org/dist/v\${NODEV}/node-v\${NODEV}-\${DISTRO}.tar.xz" | tar -xJ -C "\$TMP"
+                                        rm -rf "\${NROOT}"
+                                        mv "\$TMP/node-v\${NODEV}-\${DISTRO}" "\${NROOT}"
+                                        rm -rf "\$TMP"
+                                      fi
+                                      export PATH="\${NROOT}/bin:\$PATH"
+                                      echo "Using bootstrapped node \$(node -v) at \${NROOT}/bin/node"
+                                    }
+                                    ensure_node_18
+                                    node -v
+                                    npm -v
                                     if [ -f console-login/package-lock.json ]; then
                                         npm ci --prefix console-login
                                     else
@@ -161,7 +215,7 @@ pipeline {
             )
         }
         always {
-            junit '**/target/surefire-reports/*.xml'
+            junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
             archiveArtifacts artifacts: 'Extent_Report/index.html,Extent_Report.zip', onlyIfSuccessful: false
             publishHTML(target: [
                 allowMissing: true,

@@ -49,6 +49,9 @@ cookies.dat
 *.tmp
 *.bak
 
+# Jenkins: bootstrapped Node.js for console-login npm ci
+.jenkins-tools/
+
 # Console Google login automation
 console-login/node_modules/
 console-login/.env
