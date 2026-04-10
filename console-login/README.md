@@ -12,7 +12,7 @@ Copy `.env.example` to `.env` and set:
 
 ## 2. Node version (CI / Jenkins)
 
-Use **Node 16+** on the agent (18 LTS recommended). Older Node versions may not support ES modules features used by dependencies. The export script avoids top-level `await` so it parses on Node 12+, but **Puppeteer 24** still needs a current runtime.
+Use **Node 16+** on the agent (18 LTS recommended). The scripts avoid **top-level `await`** and **optional chaining (`?.`)** so they parse on older Jenkins Node builds; **Puppeteer 24** and its dependencies still expect a reasonably current runtime (prefer 18 LTS).
 
 ## 3. Install dependencies
 

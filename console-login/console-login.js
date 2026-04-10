@@ -26,7 +26,8 @@ dotenv.config();
 
 /** Base URL for /unbxdlogin (no trailing slash). Same file as credentials — set in .env. */
 function consoleLoginBaseUrl() {
-  const raw = process.env.CONSOLE_LOGIN_BASE_URL?.trim();
+  const envBase = process.env.CONSOLE_LOGIN_BASE_URL;
+  const raw = envBase != null ? String(envBase).trim() : '';
   const base = raw && raw.length > 0 ? raw : 'https://console.unbxd.io';
   return base.replace(/\/+$/, '');
 }
@@ -48,7 +49,8 @@ function getChromeExecutableFromCacheWin() {
  * Order: PUPPETEER_EXECUTABLE_PATH → puppeteer.executablePath() → OS defaults → Windows cache.
  */
 function resolveChromeExecutable() {
-  const fromEnv = process.env.PUPPETEER_EXECUTABLE_PATH?.trim();
+  const envPath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  const fromEnv = envPath != null ? String(envPath).trim() : '';
   if (fromEnv && fs.existsSync(fromEnv)) {
     return fromEnv;
   }
@@ -58,7 +60,7 @@ function resolveChromeExecutable() {
     if (bundled && fs.existsSync(bundled)) {
       return bundled;
     }
-  } catch {
+  } catch (e) {
     // ignore
   }
 
@@ -137,7 +139,7 @@ async function pageHasCaptchaLikeChallenge(page) {
     if (document.querySelector('iframe[src*="recaptcha"], iframe[title*="reCAPTCHA"], iframe[src*="google.com/recaptcha"]')) {
       return true;
     }
-    const body = document.body?.innerText || '';
+    const body = (document.body && document.body.innerText) || '';
     if (/Type the (text|characters|words you hear)|unusual traffic|I'm not a robot|Verify you.{0,30}not a robot/i.test(body)) {
       return true;
     }
@@ -599,7 +601,7 @@ export async function loginToConsole() {
       page,
     };
   } catch (error) {
-    try { await browser?.close(); } catch (e) {}
+    try { if (browser) await browser.close(); } catch (e) {}
     throw error;
   }
 }
