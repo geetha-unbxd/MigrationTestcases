@@ -117,7 +117,8 @@ pipeline {
                                         mv "\$TMP/node-v\${NODEV}-\${DISTRO}" "\${NROOT}"
                                         rm -rf "\$TMP"
                                       fi
-                                      export PATH="\${NROOT}/bin:\$PATH"
+                                      PATH="\${NROOT}/bin:\$PATH"
+                                      export PATH
                                       echo "Using bootstrapped node \$(node -v) at \${NROOT}/bin/node"
                                     }
                                     ensure_node_18

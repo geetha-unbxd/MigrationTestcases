@@ -110,6 +110,35 @@ function generateTOTPCode() {
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+/** Select-all modifier: Meta on macOS, Control on Linux/Windows (Meta does not clear fields on Linux). */
+function selectAllModifier() {
+  return process.platform === 'darwin' ? 'Meta' : 'Control';
+}
+
+/** Retry transient Chromium navigation errors (common in CI / headless). */
+async function gotoWithRetry(page, url, options, attempts = 4) {
+  const opts = { waitUntil: 'load', timeout: 30000, ...options };
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await page.goto(url, opts);
+    } catch (e) {
+      lastErr = e;
+      const msg = (e && e.message) ? String(e.message) : '';
+      if (
+        i < attempts - 1 &&
+        /ERR_NETWORK_CHANGED|ERR_CONNECTION|ERR_INTERNET_DISCONNECTED|net::ERR_|Navigation timeout/i.test(msg)
+      ) {
+        console.log(`  [goto] retry ${i + 2}/${attempts} after: ${msg.slice(0, 120)}`);
+        await sleep(900 + i * 500);
+      } else {
+        throw e;
+      }
+    }
+  }
+  throw lastErr;
+}
+
 /** Short wait after DOM appears — prefer navigation/selectors over long fixed delays. */
 const microWait = () => sleep(120);
 
@@ -272,7 +301,7 @@ export async function loginToConsole() {
     // Step 1: Navigate to console login page
     // 'load' is much faster than networkidle0; login page does not need a fully quiet network
     await step(`Step 1: Navigating to ${LOGIN_PAGE_URL}`, () =>
-      page.goto(LOGIN_PAGE_URL, { waitUntil: 'load', timeout: 25000 })
+      gotoWithRetry(page, LOGIN_PAGE_URL, { waitUntil: 'load', timeout: 25000 })
     );
 
     // Step 2: Click "Log in with google" — single main-world evaluate (no cross-world handles)
@@ -357,7 +386,7 @@ export async function loginToConsole() {
 
     // Step 5b: Handle any intermediate Google challenge screens in a loop.
     // Google may show: password re-confirmation, TOTP, "Continue" confirmation, etc.
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 14; i++) {
       await sleep(450);
       const currentUrl = page.url();
       if (!currentUrl.includes('accounts.google.com')) break;
@@ -436,10 +465,11 @@ export async function loginToConsole() {
                   : 'input:not([type="hidden"]):not([type="submit"]):not([type="button"])';
         await page.focus(sel);
         await sleep(80);
-        // Select all + delete to clear
-        await page.keyboard.down('Meta');
+        // Select all + delete to clear (Control+A on Linux CI — Meta does not work)
+        const mod = selectAllModifier();
+        await page.keyboard.down(mod);
         await page.keyboard.press('a');
-        await page.keyboard.up('Meta');
+        await page.keyboard.up(mod);
         await page.keyboard.press('Backspace');
         await sleep(80);
         // Type code via keyboard so JS input events fire correctly
@@ -491,8 +521,8 @@ export async function loginToConsole() {
         if (oauthContinued) {
           console.log('  Step 5f: Clicked Continue on OAuth consent page');
           await sleep(2000);
-          // Leave the loop — re-entry sees stale handles during redirect and triggers DOM.resolveNode.
-          break;
+          // Google may show a second TOTP after consent — do not break; let the loop handle it.
+          continue;
         }
 
         continue; // loop one more time to catch any remaining screens
@@ -575,7 +605,7 @@ export async function loginToConsole() {
     if (CONSOLE_TARGET_URL) {
       console.log(`  Step 7: Navigating to regional console: ${CONSOLE_TARGET_URL}`);
       try {
-        await page.goto(CONSOLE_TARGET_URL, { waitUntil: 'load', timeout: 45000 });
+        await gotoWithRetry(page, CONSOLE_TARGET_URL, { waitUntil: 'load', timeout: 45000 });
         await page.waitForNetworkIdle({ idleTime: 400, timeout: 6000 }).catch(() => sleep(500));
         console.log(`  Regional URL after navigation: ${page.url()}`);
       } catch (e) {

@@ -13,15 +13,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 public class FailedTestXmlListener implements ITestListener {
+    private final Object writeLock = new Object();
     private FileWriter writer;
 
     @Override
     public void onStart(ITestContext context) {
-        try {
-            writer = new FileWriter("failed-tests.xml");
-            writer.write("<failed-tests>\n");
-        } catch (IOException e) {
-            e.printStackTrace();
+        synchronized (writeLock) {
+            try {
+                writer = new FileWriter("failed-tests.xml");
+                writer.write("<failed-tests>\n");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -45,20 +48,32 @@ public class FailedTestXmlListener implements ITestListener {
             // Ignore if driver is not available or screenshot fails
         }
 
-        try {
-            writer.write("  <testcase name=\"" + result.getName() + "\" class=\"" + result.getTestClass().getName() + "\" screenshot=\"" + screenshotPath + "\"/>\n");
-        } catch (IOException e) {
-            e.printStackTrace();
+        synchronized (writeLock) {
+            if (writer == null) {
+                return;
+            }
+            try {
+                writer.write("  <testcase name=\"" + result.getName() + "\" class=\"" + result.getTestClass().getName() + "\" screenshot=\"" + screenshotPath + "\"/>\n");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     @Override
     public void onFinish(ITestContext context) {
-        try {
-            writer.write("</failed-tests>\n");
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        synchronized (writeLock) {
+            if (writer == null) {
+                return;
+            }
+            try {
+                writer.write("</failed-tests>\n");
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                writer = null;
+            }
         }
     }
 

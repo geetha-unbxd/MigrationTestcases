@@ -36,6 +36,19 @@ async function run() {
       expires: typeof c.expires === 'number' ? c.expires : -1
     }));
 
+    if (!cookieList.length) {
+      process.stderr.write(
+        JSON.stringify({
+          success: false,
+          error: 'Login finished but no browser cookies were captured (empty session).',
+        }) + '\n'
+      );
+      if (result.browser) {
+        await result.browser.close().catch(() => {});
+      }
+      process.exit(1);
+    }
+
     process.stdout.write(JSON.stringify({
       success: true,
       cookies: result.cookies,
