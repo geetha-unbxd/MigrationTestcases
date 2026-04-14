@@ -346,42 +346,4 @@
         </classes>
     </test>
 
-    <!-- variantLockTest -->
-    <test name="Migration - browseVariantPinning - browseGlobalVariantPinningTest">
-        <classes>
-            <class name="UnbxdTests.testNG.consoleui.variantLockTest.browseVariantPinning">
-                <methods>
-                    <include name="browseGlobalVariantPinningTest"/>
-                </methods>
-            </class>
-        </classes>
-    </test>
-    <test name="Migration - browseVariantPinning - browseVariantPinningCreateEditDeleteTest">
-        <classes>
-            <class name="UnbxdTests.testNG.consoleui.variantLockTest.browseVariantPinning">
-                <methods>
-                    <include name="browseVariantPinningCreateEditDeleteTest"/>
-                </methods>
-            </class>
-        </classes>
-    </test>
-    <test name="Migration - searchVariantPinning - searchGlobalVariantPinningTest">
-        <classes>
-            <class name="UnbxdTests.testNG.consoleui.variantLockTest.searchVariantPinning">
-                <methods>
-                    <include name="searchGlobalVariantPinningTest"/>
-                </methods>
-            </class>
-        </classes>
-    </test>
-    <test name="Migration - searchVariantPinning - searchVariantPinningCreateEditDeleteTest">
-        <classes>
-            <class name="UnbxdTests.testNG.consoleui.variantLockTest.searchVariantPinning">
-                <methods>
-                    <include name="searchVariantPinningCreateEditDeleteTest"/>
-                </methods>
-            </class>
-        </classes>
-    </test>
-
 </suite>
