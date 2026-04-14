@@ -3,13 +3,25 @@ package core.consoleui.actions;
 import core.consoleui.page.CollectionsPage;
 import core.ui.page.UnbxdCommonPage;
 import lib.compat.Page;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
 import java.io.File;
 import java.net.URL;
+import java.time.Duration;
+import java.util.List;
 
 public class CollectionsActions extends UnbxdCommonPage {
 
     @Page
     CollectionsPage collectionsPage;
+
+    /** Set in {@link #enterCollectionName()} for later search/delete steps. */
+    private String lastEnteredCollectionName;
 
     /**
      * Navigate to Collections page
@@ -20,6 +32,13 @@ public class CollectionsActions extends UnbxdCommonPage {
         goTo(collectionsUrl);
         awaitForPageToLoad();
         System.out.println("Successfully navigated to Collections page");
+    }
+
+    /** Reload the current browser tab (e.g. after upload so the listing reflects server state). */
+    public void refreshPage() {
+        System.out.println("Refreshing current page");
+        getDriver().navigate().refresh();
+        awaitForPageToLoad();
     }
 
     /**
@@ -147,14 +166,124 @@ public class CollectionsActions extends UnbxdCommonPage {
                 
                 collectionsPage.collectionNameInput.clear();
                 collectionsPage.collectionNameInput.fill().with(collectionName);
-                
+                lastEnteredCollectionName = collectionName;
+
                 System.out.println("✓ Collection name entered: " + collectionName);
             } else {
                 System.out.println("✗ Collection name input field not found");
+                lastEnteredCollectionName = null;
             }
         } catch (Exception e) {
             System.out.println("✗ Error entering collection name: " + e.getMessage());
+            lastEnteredCollectionName = null;
         }
+    }
+
+    /** Name from the last {@link #enterCollectionName()} call (for search/delete). */
+    public String getLastEnteredCollectionName() {
+        return lastEnteredCollectionName;
+    }
+
+    /**
+     * Title of the first visible collection row (for search/delete when no name was set via upload modal).
+     */
+    public String getFirstListedCollectionName() {
+        System.out.println("Reading first listed collection name");
+        WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(25));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".tbl-title-1")));
+        if (collectionsPage.collectionNames.size() < 1) {
+            return null;
+        }
+        String t = collectionsPage.collectionNames.get(0).getTextContent();
+        return t != null ? t.trim() : null;
+    }
+
+    /** Close the upload modal if it is open so the collections table and search are usable. */
+    public void closeUploadModalIfPresent() {
+        try {
+            if (collectionsPage.modalCloseButton.isDisplayed()) {
+                collectionsPage.modalCloseButton.click();
+                awaitForPageToLoad();
+                System.out.println("✓ Upload modal closed");
+            }
+        } catch (Exception e) {
+            System.out.println("  (No upload modal to close or already closed)");
+        }
+    }
+
+    /** Search the collections table by name (uses header search field). */
+    public void searchCollectionByName(String name) {
+        awaitForElementPresence(collectionsPage.searchIcon);
+        collectionsPage.searchIcon.click();
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Collection name to search is empty");
+        }
+        System.out.println("Searching for collection: " + name);
+        WebDriverWait clickWait = new WebDriverWait(getDriver(), Duration.ofSeconds(30));
+        clickWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#csSearchQuery")));
+        collectionsPage.searchInput.clear();
+        collectionsPage.searchInput.fill().with(name.trim());
+        collectionsPage.searchInput.getElement().sendKeys(Keys.ENTER);
+        awaitForPageToLoad();
+        System.out.println("✓ Search submitted for: " + name);
+    }
+
+    /**
+     * After a search/filter, returns whether any row title contains {@code expectedName} within the timeout.
+     */
+    public boolean isCollectionListedInResults(String expectedName, int timeoutSeconds) {
+        if (expectedName == null || expectedName.trim().isEmpty()) {
+            return false;
+        }
+        final String needle = expectedName.trim();
+        try {
+            WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(timeoutSeconds));
+            return Boolean.TRUE.equals(
+                    wait.until(
+                            d -> {
+                                List<WebElement> titles = d.findElements(By.cssSelector(".tbl-title-1"));
+                                for (WebElement el : titles) {
+                                    try {
+                                        String t = el.getText();
+                                        if (t != null && t.trim().contains(needle)) {
+                                            return true;
+                                        }
+                                    } catch (StaleElementReferenceException ignored) {
+                                        return false;
+                                    }
+                                }
+                                return false;
+                            }));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Asserts a row is visible whose collection title contains the given name (after search/filter).
+     */
+    public void verifyCollectionExistsInResults(String expectedName) {
+        if (expectedName == null || expectedName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Expected collection name is empty");
+        }
+        final String needle = expectedName.trim();
+        System.out.println("Verifying collection is listed: " + needle);
+        WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(25));
+        wait.until(d -> {
+            List<WebElement> titles = d.findElements(By.cssSelector(".tbl-title-1"));
+            for (WebElement el : titles) {
+                try {
+                    String t = el.getText();
+                    if (t != null && t.trim().contains(needle)) {
+                        return true;
+                    }
+                } catch (StaleElementReferenceException ignored) {
+                    return false;
+                }
+            }
+            return false;
+        });
+        System.out.println("✓ Collection found in table: " + needle);
     }
 
     /**
@@ -231,6 +360,35 @@ public class CollectionsActions extends UnbxdCommonPage {
             }
         } catch (Exception e) {
             System.out.println("✗ Error verifying file upload: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Deletes the first collection row using the trash icon, then confirms in the modal.
+     * Use after a successful upload when the new row is listed.
+     */
+    public void deleteFirstCollection() {
+        System.out.println("Deleting collection (trash icon + confirm)");
+        try {
+            WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(25));
+            wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.cssSelector("span.unx-icon-trash-2.unx-qa-deleteicon")));
+            if (collectionsPage.deleteIcons.size() < 1) {
+                throw new RuntimeException("No delete (trash) icons found on Collections table");
+            }
+            wait.until(ExpectedConditions.elementToBeClickable(collectionsPage.deleteIcons.get(0).getElement()));
+            collectionsPage.deleteIcons.get(0).click();
+            System.out.println("✓ Trash icon clicked");
+
+            WebDriverWait modalWait = new WebDriverWait(getDriver(), Duration.ofSeconds(12));
+            By confirmBtn = By.cssSelector(".modal-footer .RCB-btn-primary");
+            modalWait.until(ExpectedConditions.elementToBeClickable(confirmBtn));
+            getDriver().findElement(confirmBtn).click();
+            awaitForPageToLoad();
+            System.out.println("✓ Collection delete confirmed");
+        } catch (Exception e) {
+            System.out.println("✗ Error deleting collection: " + e.getMessage());
+            throw new RuntimeException("Failed to delete collection: " + e.getMessage(), e);
         }
     }
 

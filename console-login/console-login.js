@@ -142,6 +142,103 @@ async function gotoWithRetry(page, url, options, attempts = 4) {
 /** Short wait after DOM appears — prefer navigation/selectors over long fixed delays. */
 const microWait = () => sleep(120);
 
+/** True if a TOTP-like field exists (no ElementHandle — avoids DOM.resolveNode leaks). */
+async function hasTotpLikeInput(page) {
+  return page.evaluate(() => {
+    return !!document.querySelector(
+      'input[name="totpPin"], input[name="Pin"], input[autocomplete="one-time-code"], ' +
+        'input#totpPin[type="tel"], input[type="tel"][id*="totp"]'
+    );
+  });
+}
+
+/** Pick a CSS selector for the TOTP field using main-world evaluate only (no orphan handles). */
+async function pickTotpSelector(page) {
+  return page.evaluate(() => {
+    const sels = [
+      'input[name="totpPin"]',
+      'input[name="Pin"]',
+      'input[autocomplete="one-time-code"]',
+      'input#totpPin[type="tel"]',
+      'input[type="tel"]',
+    ];
+    for (const s of sels) {
+      try {
+        if (document.querySelector(s)) return s;
+      } catch (e) {
+        /* ignore */
+      }
+    }
+    return '';
+  });
+}
+
+/**
+ * After OAuth consent "Continue", navigation may already be done — waitForNavigation can race.
+ * Settles the document before the next loop iteration (reduces Protocol error DOM.resolveNode).
+ */
+async function settleAfterOAuthNavigation(page) {
+  await sleep(500);
+  try {
+    await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 22000 });
+  } catch (e) {
+    await sleep(1800);
+  }
+  await sleep(1000);
+}
+
+/**
+ * Focus Google's password field in this frame if present: prefers input[name="Passwd"],
+ * else first visible input[type="password"] that is not CAPTCHA-related (challenge/pwd
+ * sometimes omits name="Passwd" or only hosts the field in a subframe).
+ */
+async function focusGooglePasswordFieldInFrame(frame) {
+  return frame
+    .evaluate(() => {
+      function vis(el) {
+        if (!el || el.disabled) return false;
+        const r = el.getBoundingClientRect();
+        return (r.width > 0 && r.height > 0) || el.offsetParent !== null;
+      }
+      const byName = document.querySelector('input[name="Passwd"]');
+      if (vis(byName)) {
+        byName.focus();
+        return true;
+      }
+      for (const el of document.querySelectorAll('input[type="password"]')) {
+        if (!vis(el)) continue;
+        const hint = `${el.name || ''} ${el.id || ''} ${el.className || ''}`;
+        if (/captcha|recaptcha/i.test(hint)) continue;
+        if ((el.name || '').toLowerCase() === 'identifier') continue;
+        el.focus();
+        return true;
+      }
+      return false;
+    })
+    .catch(() => false);
+}
+
+/** Frames: main first, then others (password iframe is often not the first in the list). */
+function framesMainFirst(page) {
+  const all = page.frames();
+  const main = page.mainFrame();
+  return [main, ...all.filter(f => f !== main)];
+}
+
+/**
+ * Poll until a password field is focused in some frame; then use page.keyboard to type.
+ */
+async function waitForGooglePasswordFieldAnywhere(page, timeoutMs = 90000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    for (const frame of framesMainFirst(page)) {
+      if (await focusGooglePasswordFieldInFrame(frame)) return;
+    }
+    await sleep(350);
+  }
+  throw new Error('No element found for selector: input[name="Passwd"]');
+}
+
 /** Clicks in the page main frame only — avoids $$eval + navigation races that trigger
  * "Argument should belong to the same JavaScript world as target object" on some Chrome/Puppeteer builds. */
 async function clickInPage(page, fn) {
@@ -376,10 +473,9 @@ export async function loginToConsole() {
     // Step 5: Enter password — only Google’s real password field (name="Passwd"), never CAPTCHA text inputs
     await step('Step 5: Entering password', async () => {
       await waitForManualCaptchaIfNeeded(page);
-      await page.waitForSelector('input[name="Passwd"]', { visible: true, timeout: 90000 });
+      await waitForGooglePasswordFieldAnywhere(page, 90000);
       await microWait();
-      await page.focus('input[name="Passwd"]');
-      await page.type('input[name="Passwd"]', GOOGLE_PASSWORD, { delay: 22 });
+      await page.keyboard.type(GOOGLE_PASSWORD, { delay: 22 });
       await page.keyboard.press('Enter');
       await page.waitForNetworkIdle({ idleTime: 350, timeout: 12000 }).catch(() => sleep(700));
     });
@@ -401,10 +497,10 @@ export async function loginToConsole() {
       if (currentUrl.includes('challenge/pwd')) {
         console.log('  Step 5b: Handling password re-confirmation challenge...');
         await waitForManualCaptchaIfNeeded(page);
-        await page.waitForSelector('input[name="Passwd"]', { visible: true, timeout: 60000 });
+        await sleep(600);
+        await waitForGooglePasswordFieldAnywhere(page, 90000);
         await microWait();
-        await page.focus('input[name="Passwd"]');
-        await page.type('input[name="Passwd"]', GOOGLE_PASSWORD, { delay: 35 });
+        await page.keyboard.type(GOOGLE_PASSWORD, { delay: 35 });
         await page.keyboard.press('Enter');
         continue;
       }
@@ -416,21 +512,17 @@ export async function loginToConsole() {
         currentUrl.includes('challenge/totp') ||
         currentUrl.includes('challenge/ipp') ||
         /\/signin\/challenge\/totp/i.test(currentUrl);
-      const totpHandle = await page.$(
-        'input[name="totpPin"], input[name="Pin"], input[autocomplete="one-time-code"], ' +
-        'input[id="totpPin"][type="tel"], input[type="tel"][id*="totp"]'
-      );
+      const totpPresent = await hasTotpLikeInput(page);
       // Do not treat stray totpPin nodes on oauth/consent screens as TOTP — causes re-entry and
       // Runtime.callFunctionOn "same JavaScript world" errors after Continue navigates.
       const shouldRunTotpStep =
         onTotpUrl ||
         /\/challenge\/(totp|ipp|ootp)\b/i.test(currentUrl) ||
-        (totpHandle &&
+        (totpPresent &&
           /challenge/i.test(currentUrl) &&
           !/oauth/i.test(currentUrl) &&
           !/\/consent/i.test(currentUrl));
       if (shouldRunTotpStep) {
-        if (totpHandle) await totpHandle.dispose().catch(() => {});
         console.log('  Step 5c: Entering TOTP code...');
         const code = generateTOTPCode();
         if (!code) throw new Error('TOTP required but TOTP_SECRET not set');
@@ -445,24 +537,13 @@ export async function loginToConsole() {
           }))
         ).catch(() => []);
         console.log('  Step 5c: inputs on page: ' + JSON.stringify(inputInfo));
-        const target =
-          (await page.$('input[name="totpPin"]')) ||
-          (await page.$('input[name="Pin"]')) ||
-          (await page.$('input[autocomplete="one-time-code"]')) ||
-          (await page.$('input#totpPin[type="tel"]')) ||
-          (await page.$('input[type="tel"]'));
-        if (!target) {
+        const sel = await pickTotpSelector(page);
+        if (!sel) {
           // No input found — page is likely mid-transition after a previous TOTP submission
           console.log('  Step 5c: No TOTP input found, page may be transitioning — waiting...');
           await sleep(1200);
           continue;
         }
-        // Determine the best CSS selector for the TOTP field (in priority order)
-        const sel = (await page.$('input[name="totpPin"]'))     ? 'input[name="totpPin"]'
-                  : (await page.$('input[name="Pin"]'))         ? 'input[name="Pin"]'
-                  : (await page.$('input[autocomplete="one-time-code"]')) ? 'input[autocomplete="one-time-code"]'
-                  : (await page.$('input[type="tel"]'))         ? 'input[type="tel"]'
-                  : 'input:not([type="hidden"]):not([type="submit"]):not([type="button"])';
         await page.focus(sel);
         await sleep(80);
         // Select all + delete to clear (Control+A on Linux CI — Meta does not work)
@@ -520,8 +601,8 @@ export async function loginToConsole() {
         }).catch(() => false);
         if (oauthContinued) {
           console.log('  Step 5f: Clicked Continue on OAuth consent page');
-          await sleep(2000);
-          // Google may show a second TOTP after consent — do not break; let the loop handle it.
+          await settleAfterOAuthNavigation(page);
+          // Google may show a second TOTP after consent — let the loop handle it.
           continue;
         }
 
@@ -559,10 +640,9 @@ export async function loginToConsole() {
     if (page.url().includes('challenge/pwd')) {
       console.log('  Step 5g: Late challenge/pwd — re-entering password');
       await waitForManualCaptchaIfNeeded(page);
-      await page.waitForSelector('input[name="Passwd"]', { visible: true, timeout: 60000 });
+      await waitForGooglePasswordFieldAnywhere(page, 90000);
       await microWait();
-      await page.focus('input[name="Passwd"]');
-      await page.type('input[name="Passwd"]', GOOGLE_PASSWORD, { delay: 28 });
+      await page.keyboard.type(GOOGLE_PASSWORD, { delay: 28 });
       await page.keyboard.press('Enter');
       await page.waitForNetworkIdle({ idleTime: 400, timeout: 15000 }).catch(() => sleep(900));
     }

@@ -34,7 +34,7 @@ public class CollectionsPage extends ConsoleCommonPage {
     @FindBy(css = ".search-input-box")
     public FluentWebElement searchInputBox;
 
-    @FindBy(css = ".search-icon-medium.unx-qa-seach-Icon")
+    @FindBy(css = ".unx-qa-seach-Icon")
     public FluentWebElement searchIcon;
 
     @FindBy(css = "#csSearchQuery")
@@ -130,8 +130,8 @@ public class CollectionsPage extends ConsoleCommonPage {
     @FindBy(css = ".download-file-icon")
     public FluentList<FluentWebElement> downloadIcons;
 
-    // Delete icon
-    @FindBy(css = ".delete-row-icon.unx-qa-deleteicon")
+    // Delete icon (trash)
+    @FindBy(css = "span.unx-icon-trash-2.unx-qa-deleteicon")
     public FluentList<FluentWebElement> deleteIcons;
 
     // Pagination elements

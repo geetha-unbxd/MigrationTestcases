@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/test-1.0.dtd" >
+<suite name="SingleCollectionBrowse" parallel="none" thread-count="1" verbose="2">
+    <test name="CollectionsuplodFileBrowse">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.Collections.CollectionsuplodFileBrowse"/>
+        </classes>
+    </test>
+    <test name="CollectionsuploadFileSearch">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.Collections.CollectionsuploadFileSearch"/>
+        </classes>
+    </test>
+</suite>
