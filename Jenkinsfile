@@ -1,7 +1,6 @@
 // Console UI suites: add Jenkins "Secret text" credentials with IDs GOOGLE_EMAIL, GOOGLE_PASSWORD,
 // TOTP_SECRET (same IDs as in withCredentials below). Puppeteer 24 needs Node.js 18+ for npm install.
-// Use optional NODEJS_TOOL (Global Tool: NodeJS) or rely on node>=18 on PATH; otherwise we bootstrap
-// Node 18.20.4 under workspace .jenkins-tools/ (Linux/mac).
+// Rely on node>=18 on PATH; otherwise we bootstrap Node 18.20.4 under workspace .jenkins-tools/ (Linux/mac).
 pipeline {
     agent any
     environment {
@@ -19,30 +18,10 @@ pipeline {
             defaultValue: 'src/test/resources/testNG/Migration.xml',
             description: 'Suite XML path under the repo (only Migration.xml is bundled; override if you add another suite file)'
         )
-        booleanParam(
-            name: 'TRIGGER_NEXT',
-            defaultValue: false,
-            description: 'Trigger downstream jobs automatically'
-        )
-        string(
-            name: 'NODEJS_TOOL',
-            defaultValue: '',
-            description: 'Optional: Jenkins Global Tool name for Node 18+ (Manage Jenkins → Tools → NodeJS). Leave empty to use PATH or auto-download Node 18.20.4.'
-        )
         string(
             name: 'UNBXD_CONSOLE_SITE_ID',
             defaultValue: '',
-            description: 'Optional: numeric site id from env YAML (sites[].siteId, e.g. 139 on Dev). Resolves to that row\'s id for login. Overrides UNBXD_SITE_CONTEXT_ID when set.'
-        )
-        string(
-            name: 'UNBXD_SITE_CONTEXT_ID',
-            defaultValue: '',
-            description: 'Optional: YAML site row id (sites[].id, e.g. 2) when you do not use UNBXD_CONSOLE_SITE_ID.'
-        )
-        string(
-            name: 'UNBXD_USER_ID',
-            defaultValue: '',
-            description: 'Optional: YAML user id (users[].id). If empty: suite login uses 1; Merch/upload class context uses 2.'
+            description: 'Optional: numeric site id from env YAML (sites[].siteId, e.g. 139 on Dev). Resolves to that row\'s id for login. If empty, tests use defaults from code (YAML site id / user).'
         )
     }
     stages {
@@ -81,30 +60,12 @@ pipeline {
                     echo "Running tests on ENV: ${params.ENV} | Suite: ${suiteToRun} | Console Google login: ${isConsole}"
                     def siteProps = ''
                     def consoleSite = params.UNBXD_CONSOLE_SITE_ID != null ? params.UNBXD_CONSOLE_SITE_ID.toString().trim() : ''
-                    def ctxSite = params.UNBXD_SITE_CONTEXT_ID != null ? params.UNBXD_SITE_CONTEXT_ID.toString().trim() : ''
-                    def runUser = params.UNBXD_USER_ID != null ? params.UNBXD_USER_ID.toString().trim() : ''
                     if (consoleSite) {
                         siteProps += " -Dunbxd.console.site.id=${consoleSite}"
-                    } else if (ctxSite) {
-                        siteProps += " -Dunbxd.site.context.id=${ctxSite}"
-                    }
-                    if (runUser) {
-                        siteProps += " -Dunbxd.user.id=${runUser}"
                     }
                     def mvnCmd = "mvn clean test -P${params.ENV} -Denv.profile=${params.ENV} -DhubUrl=${env.SELENIUM_GRID_URL} -DsuiteXmlFile=${suiteToRun} -Dlistener=core.reporting.ExtentTestNGITestListener,core.AnnotationTransformer${siteProps}"
                     int mvnStatus
                     if (isConsole) {
-                        def nodePrep = ''
-                        def nodeToolName = params.NODEJS_TOOL != null ? params.NODEJS_TOOL.toString().trim() : ''
-                        if (nodeToolName) {
-                            try {
-                                def nh = tool name: nodeToolName, type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
-                                nodePrep = "export PATH=\"${nh}/bin:\$PATH\"\n"
-                                echo "Using Jenkins NodeJS tool: ${nh}"
-                            } catch (Exception e) {
-                                echo "NODEJS_TOOL '${nodeToolName}' unavailable (${e.message}); using PATH or Node bootstrap."
-                            }
-                        }
                         withCredentials([
                             string(credentialsId: 'GOOGLE_EMAIL', variable: 'GOOGLE_EMAIL'),
                             string(credentialsId: 'GOOGLE_PASSWORD', variable: 'GOOGLE_PASSWORD'),
@@ -113,7 +74,6 @@ pipeline {
                             mvnStatus = sh(
                                 script: """
                                     set -e
-                                    ${nodePrep}
                                     ensure_node_18() {
                                       if command -v node >/dev/null 2>&1; then
                                         NVER=\$(node -p "parseInt(process.versions.node.split('.')[0],10)" 2>/dev/null || echo 0)
@@ -253,42 +213,6 @@ pipeline {
                 reportFiles: 'index.html',
                 reportName: 'Extent Report'
             ])
-            
-            // -----------------------------
-            // Downstream Jobs Trigger Logic (runs regardless of build result)
-            // -----------------------------
-            script {
-                if (params.TRIGGER_NEXT) {
-                    try {
-                        // Chain 1: merchandisingNew -> FTU_SmokeTest
-                        if (env.JOB_NAME == 'merchandisingNew') {
-                            build job: 'FTU_SmokeTest',
-                                  parameters: [string(name: 'ENV', value: params.ENV), booleanParam(name: 'TRIGGER_NEXT', value: false)],
-                                  wait: false,
-                                  propagate: false
-                        }
-                        // Chain 2: selfServe_manage_testcases -> SS_BulkUploadTest -> website-preview-automation
-                        else if (env.JOB_NAME == 'selfServe_manage_testcases') {
-                            build job: 'SS_BulkUploadTest',
-                                  parameters: [
-                                      string(name: 'ENV', value: params.ENV),
-                                      string(name: 'SUITE_FILE', value: 'src/test/resources/testNG/BulkUploadTest.xml'),
-                                      booleanParam(name: 'TRIGGER_NEXT', value: true)
-                                  ],
-                                  wait: false,
-                                  propagate: false
-                        }
-                        else if (env.JOB_NAME == 'SS_BulkUploadTest') {
-                            build job: 'website-preview-automation',
-                                  parameters: [string(name: 'ENV', value: params.ENV), booleanParam(name: 'TRIGGER_NEXT', value: false)],
-                                  wait: false,
-                                  propagate: false
-                        }
-                    } catch (err) {
-                        echo "Downstream trigger error: ${err}"
-                    }
-                }
-            }
         }
     }
 }
