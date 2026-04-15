@@ -31,11 +31,14 @@ public class uploadTest extends BaseTest {
     CommercePageActions BrowsePage;
 
 
+    @Override
     @BeforeClass(groups={"sanity"})
     public void setUp() {
         super.setUp();
         EnvironmentConfig.unSetContext();
-        EnvironmentConfig.setContext(2, 2);
+        int siteCtx = EnvironmentConfig.resolveLoginSiteContextId(2);
+        int uid = EnvironmentConfig.resolveUserId(2);
+        EnvironmentConfig.setContext(uid, siteCtx);
         goTo(searchPage);
         ThreadWait();
     }

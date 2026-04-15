@@ -56,6 +56,5 @@ public class CollectionsuploadFileSearch extends uploadTest {
             System.out.println("Step 8: Collection not listed after search — skipping delete");
         }
         
-        System.out.println("✓ Collections file upload test completed successfully");
     }
 } 

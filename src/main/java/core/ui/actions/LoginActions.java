@@ -12,9 +12,13 @@ public class LoginActions extends WelcomePage {
 
     public void login()
     {
-        // Default login Uses SiteId 0 and UserId 1
-        login(0,1);
-
+        try {
+            int siteCtx = EnvironmentConfig.resolveLoginSiteContextId(2);
+            int uid = EnvironmentConfig.resolveUserId(1);
+            login(siteCtx, uid);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to resolve default login site/user", e);
+        }
     }
 
     public void login(int siteId,int userId)

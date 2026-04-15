@@ -16,6 +16,7 @@ import java.lang.reflect.Method;
 
 import core.ui.actions.LoginActions;
 import lib.BrowserInitializer;
+import lib.EnvironmentConfig;
 import lib.GlobalCookieManager;
 import lib.GlobalLoginManager;
 
@@ -73,7 +74,9 @@ public class BaseTest extends SeleniumBase {
     protected void performGlobalLogin() {
         try {
             System.out.println("Performing direct login with this test's own loginActions...");
-            loginActions.login(0, 1);
+            int siteCtx = EnvironmentConfig.resolveLoginSiteContextId(2);
+            int uid = EnvironmentConfig.resolveUserId(1);
+            loginActions.login(siteCtx, uid);
             GlobalCookieManager.storeCookies(driver);
         } catch (Exception e) {
             System.err.println("Global login failed: " + e.getMessage());
@@ -128,8 +131,10 @@ public class BaseTest extends SeleniumBase {
             LoginActions suiteLoginActions = suiteBaseTest.loginActions;
             GlobalLoginManager.setLoginActions(suiteLoginActions);
 
-            System.out.println("Performing suite login for site 0, user 1");
-            GlobalLoginManager.performGlobalLogin(suiteDriver, 0, 1);
+            int suiteSite = EnvironmentConfig.resolveLoginSiteContextId(2);
+            int suiteUser = EnvironmentConfig.resolveUserId(1);
+            System.out.println("Performing suite login for site (yaml id)=" + suiteSite + ", user " + suiteUser);
+            GlobalLoginManager.performGlobalLogin(suiteDriver, suiteSite, suiteUser);
 
             System.out.println("Suite login completed - cookies stored for reuse");
 

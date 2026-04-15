@@ -73,6 +73,21 @@ public class Configuration {
         return null;
     }
 
+    /**
+     * Find site row by numeric console site id (YAML field {@code siteId}, e.g. 139).
+     */
+    public Site findSiteByConsoleSiteId(long consoleSiteId) {
+        if (sites == null) {
+            return null;
+        }
+        for (Site site : sites) {
+            if (site.getSiteId() != null && site.getSiteId().longValue() == consoleSiteId) {
+                return site;
+            }
+        }
+        return null;
+    }
+
     public User getUserById(int id){
 
         for(User user:users){

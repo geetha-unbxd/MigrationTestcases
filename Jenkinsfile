@@ -29,6 +29,21 @@ pipeline {
             defaultValue: '',
             description: 'Optional: Jenkins Global Tool name for Node 18+ (Manage Jenkins → Tools → NodeJS). Leave empty to use PATH or auto-download Node 18.20.4.'
         )
+        string(
+            name: 'UNBXD_CONSOLE_SITE_ID',
+            defaultValue: '',
+            description: 'Optional: numeric site id from env YAML (sites[].siteId, e.g. 139 on Dev). Resolves to that row\'s id for login. Overrides UNBXD_SITE_CONTEXT_ID when set.'
+        )
+        string(
+            name: 'UNBXD_SITE_CONTEXT_ID',
+            defaultValue: '',
+            description: 'Optional: YAML site row id (sites[].id, e.g. 2) when you do not use UNBXD_CONSOLE_SITE_ID.'
+        )
+        string(
+            name: 'UNBXD_USER_ID',
+            defaultValue: '',
+            description: 'Optional: YAML user id (users[].id). If empty: suite login uses 1; Merch/upload class context uses 2.'
+        )
     }
     stages {
         stage('Build') { steps { sh 'mvn clean compile' } }
@@ -64,7 +79,19 @@ pipeline {
                         suiteToRun.endsWith('/testng-console-ui.xml')
                     )
                     echo "Running tests on ENV: ${params.ENV} | Suite: ${suiteToRun} | Console Google login: ${isConsole}"
-                    def mvnCmd = "mvn clean test -P${params.ENV} -Denv.profile=${params.ENV} -DhubUrl=${env.SELENIUM_GRID_URL} -DsuiteXmlFile=${suiteToRun} -Dlistener=core.reporting.ExtentTestNGITestListener,core.AnnotationTransformer"
+                    def siteProps = ''
+                    def consoleSite = params.UNBXD_CONSOLE_SITE_ID != null ? params.UNBXD_CONSOLE_SITE_ID.toString().trim() : ''
+                    def ctxSite = params.UNBXD_SITE_CONTEXT_ID != null ? params.UNBXD_SITE_CONTEXT_ID.toString().trim() : ''
+                    def runUser = params.UNBXD_USER_ID != null ? params.UNBXD_USER_ID.toString().trim() : ''
+                    if (consoleSite) {
+                        siteProps += " -Dunbxd.console.site.id=${consoleSite}"
+                    } else if (ctxSite) {
+                        siteProps += " -Dunbxd.site.context.id=${ctxSite}"
+                    }
+                    if (runUser) {
+                        siteProps += " -Dunbxd.user.id=${runUser}"
+                    }
+                    def mvnCmd = "mvn clean test -P${params.ENV} -Denv.profile=${params.ENV} -DhubUrl=${env.SELENIUM_GRID_URL} -DsuiteXmlFile=${suiteToRun} -Dlistener=core.reporting.ExtentTestNGITestListener,core.AnnotationTransformer${siteProps}"
                     int mvnStatus
                     if (isConsole) {
                         def nodePrep = ''
