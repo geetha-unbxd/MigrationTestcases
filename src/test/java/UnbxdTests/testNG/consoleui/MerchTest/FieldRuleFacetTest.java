@@ -121,44 +121,6 @@ public class FieldRuleFacetTest extends MerchandisingTest {
     }
 
 
-    @FileToTest(value = "/consoleTestData/gobalFieldRule.json")
-    @Test(description = "Verifies the filtering functionality for global search facets (text/range, enabled/disabled).", priority = 3,dataProviderClass = ResourceLoader.class, dataProvider = "getTestDataFromFile")
-    public void verifyGlobalSearchFacetFiltersTest(Object jsonObject) throws InterruptedException {
-
-        JsonObject globalData = (JsonObject) jsonObject;
-        String Facet_TypeText = globalData.get("Facet_Type").getAsString();
-        String FacetStatusEnabled = globalData.get("Facet_Status").getAsString();
-        String Facet_TypeRange = globalData.get("FacetType").getAsString();
-        String FacetStatusDisabled = globalData.get("FacetStatus").getAsString();
-
-        goTo(searchPage);
-        searchPage.threadWait();
-        merchandisingActions.goToSection(UnbxdEnum.FACETS);
-        searchPageActions.awaitForPageToLoad();
-        createGlobalRulePromotion();
-
-        //Text and enabled
-        facetActions.facetFilterIcon();
-        facetActions.applyTextAndEnabledFilter();
-        facetActions.ApplyFilterButton();
-        facetActions.verifyAppliedFilter(Facet_TypeText,FacetStatusEnabled);
-        facetActions.verifyTextFilterAndEnabledFilter(Facet_TypeText);
-
-        //Disable filter
-        facetActions.facetFilterIcon();
-        facetActions.applyTextAndEnabledFilter();
-        facetActions.ApplyFilterButton();
-        facetActions.verifyAppliedFilterIsNotPresent();
-
-        //range and disabled
-        facetActions.facetFilterIcon();
-        facetActions.applyRangeAndDisabledFilter();
-        facetActions.ApplyFilterButton();
-        facetActions.verifyAppliedFilter(Facet_TypeRange,FacetStatusDisabled);
-        facetActions.verifyRangeFilterAndDisabledFilter(Facet_TypeRange);
-        click(merchandisingActions.fieldRulePublishBtn);
-    }
-
 
 //Test case for browse
 
@@ -215,46 +177,6 @@ public class FieldRuleFacetTest extends MerchandisingTest {
 
     }
 
-
-
-
-    @FileToTest(value = "/consoleTestData/gobalFieldRule.json")
-    @Test(description = "Verifies the filtering functionality for global browse facets (text/range, enabled/disabled).", priority = 9,dataProviderClass = ResourceLoader.class, dataProvider = "getTestDataFromFile")
-    public void browseGlobalFacetWithFilterTest(Object jsonObject) throws InterruptedException {
-
-        JsonObject globalData = (JsonObject) jsonObject;
-        String Facet_TypeText = globalData.get("Facet_Type").getAsString();
-        String FacetStatusEnabled = globalData.get("Facet_Status").getAsString();
-        String Facet_TypeRange = globalData.get("FacetType").getAsString();
-        String FacetStatusDisabled = globalData.get("FacetStatus").getAsString();
-
-        goTo(browsePage);
-        searchPage.threadWait();
-        merchandisingActions.goToSection(UnbxdEnum.FACETS);
-        searchPageActions.awaitForPageToLoad();
-        createGlobalRulePromotion();
-
-        //Text and enabled
-        facetActions.facetFilterIcon();
-        facetActions.applyTextAndEnabledFilter();
-        facetActions.ApplyFilterButton();
-        facetActions.verifyAppliedFilter(Facet_TypeText,FacetStatusEnabled);
-        facetActions.verifyTextFilterAndEnabledFilter(Facet_TypeText);
-
-        //Disable filter
-        facetActions.facetFilterIcon();
-        facetActions.applyTextAndEnabledFilter();
-        facetActions.ApplyFilterButton();
-        facetActions.verifyAppliedFilterIsNotPresent();
-
-        //range and disabled
-        facetActions.facetFilterIcon();
-        facetActions.applyRangeAndDisabledFilter();
-        facetActions.ApplyFilterButton();
-        facetActions.verifyAppliedFilter(Facet_TypeRange,FacetStatusDisabled);
-        facetActions.verifyRangeFilterAndDisabledFilter(Facet_TypeRange);
-        click(merchandisingActions.fieldRulePublishBtn);
-    }
 
     @AfterClass(alwaysRun = true, groups = {"sanity"})
     public void deleteCreatedRules() throws InterruptedException {

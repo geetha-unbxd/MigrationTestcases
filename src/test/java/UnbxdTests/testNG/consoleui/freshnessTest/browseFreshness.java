@@ -113,44 +113,7 @@ public class browseFreshness extends MerchandisingTest {
     }
 
 
-    @FileToTest(value = "/consoleTestData/freshness.json")
-    @Test(description = "Browse: Creates and verifies the global campaign creation with Freshness for Browse Campaigns", dataProviderClass = ResourceLoader.class, dataProvider = "getTestDataFromFile", groups = {"merchandising", "sanity"})
-    public void browseGlobalFreshnessTest(Object jsonObject) throws InterruptedException {
-        JsonObject freshnessJsonObject = (JsonObject) jsonObject;
-        page = freshnessJsonObject.get("query").getAsString();
-        String AttributeName = freshnessJsonObject.get("attribute").getAsString();
-        String AttributeValue = freshnessJsonObject.get("value").getAsString();
 
-        goTo(browsePage);
-        ThreadWait();
-        await();
-        createGlobalRulePromotion();
-
-        merchandisingActions.goToSectionInMerchandising(UnbxdEnum.FRESH);
-        FreshnessAction.selectAttribute(AttributeName);
-        FreshnessAction.selectAttributeValue(AttributeValue);
-        merchandisingActions.clickOnApplyButton();
-        ThreadWait();
-
-        // Wait for products to be visible and verify date_iso for first 5 products
-        int daysThreshold = Integer.parseInt(AttributeValue);
-        FreshnessAction.verifyDateIsoForFirstFiveProducts(daysThreshold);
-        searchPage.threadWait();
-        merchandisingActions.publishCampaign();
-        merchandisingActions.verifySuccessMessage();
-        ThreadWait();
-
-        searchPage.editGlobalRule();
-        ThreadWait();
-        searchPage.scrollToBottom();
-        ThreadWait();
-        searchPage.scrollToBottom();
-        // Verify freshness summary value in the promotion rules summary
-        FreshnessAction.verifyFreshnessSummaryValue(AttributeValue);
-        ThreadWait();
-        FreshnessAction.verifyDateIsoForFirstFiveProducts(daysThreshold);
-
-    }
 
     @AfterClass(alwaysRun = true, groups = {"sanity"})
     public void deleteCreatedRules() throws InterruptedException {

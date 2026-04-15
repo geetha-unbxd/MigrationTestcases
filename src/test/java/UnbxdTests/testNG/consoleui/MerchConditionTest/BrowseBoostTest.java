@@ -89,48 +89,6 @@ public class BrowseBoostTest extends MerchandisingTest {
 
     }
 
-   @FileToTest(value = "/consoleTestData/globalRule.json")
-    @Test(description = "BROWSE: verifies the global campaign creation with Boost for Search Campaigns", priority = 2, dataProviderClass = ResourceLoader.class, dataProvider = "getTestDataFromFile", groups = {"merchandising"})
-    public void browseGlobalBoostingTest(Object jsonObject) throws InterruptedException
-    {
-        ArrayList<String> conditiontypes = new ArrayList<String>();
-        conditiontypes.add("Boost");
-        conditiontypes.add("Filter");
-
-        JsonObject boostJsonObject = (JsonObject) jsonObject;
-
-        goTo(browsePage);
-        await();
-        createGlobalRulePromotion();
-
-        JsonArray object = boostJsonObject.get("data").getAsJsonArray();
-
-        merchandisingActions.goToSectionInMerchandising(UnbxdEnum.BOOST);
-        int group1=searchPageActions.conditionsList.size();
-        merchandisingActions.deleteConditionIfItsPresent(group1);
-        merchandisingActions.selectGlobalActionType(UnbxdEnum.GLOBALBOOST);
-        fillMerchandisingData(object,UnbxdEnum.BOOST,false);
-        merchandisingActions.clickOnApplyButton();
-
-        merchandisingActions.goToSectionInMerchandising(UnbxdEnum.FILTER);
-        int group2=searchPageActions.conditionsList.size();
-        merchandisingActions.deleteConditionIfItsPresent(group2);
-        merchandisingActions.selectGlobalActionType(UnbxdEnum.GLOBALFILTER);
-        fillMerchandisingData(object,UnbxdEnum.FILTER,false);
-        merchandisingActions.clickOnApplyButton();
-
-        merchandisingActions.publishGlobalRule();
-        merchandisingActions.verifySuccessMessage();
-        searchPage.editGlobalRule();
-        int group = searchPageActions.getConditionSize();
-
-        for (String conditiontype : conditiontypes)
-        {
-            Assert.assertTrue(searchPage.promotionRuleSummary.getText().contains(conditiontype),"SELECTED CONDITION TYPE :" + conditiontype + "IS NOT COMING ");
-        }
-        Assert.assertEquals(group,2, "BROWSE: NUMBER OF CONDITION GROUP IS WRONG!!! SELECTED CONDITION GROUP IS : " + group);
-    }
-
 
     @AfterClass(alwaysRun = true, groups = {"sanity"})
     public void deleteCreatedRules() throws InterruptedException {

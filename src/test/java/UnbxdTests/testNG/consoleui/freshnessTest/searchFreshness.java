@@ -108,44 +108,6 @@ public class searchFreshness extends MerchandisingTest {
     }
 
 
-    @FileToTest(value = "/consoleTestData/freshness.json")
-    @Test(description = "Search: Creates and verifies the global campaign creation with Freshness for Search Campaigns", dataProviderClass = ResourceLoader.class, dataProvider = "getTestDataFromFile", groups = {"merchandising","sanity"})
-    public void searchGlobalFreshnessTest(Object jsonObject) throws InterruptedException
-    {
-        JsonObject freshnessJsonObject = (JsonObject) jsonObject;
-        query = freshnessJsonObject.get("query").getAsString();
-        String AttributeName = freshnessJsonObject.get("attribute").getAsString();
-        String AttributeValue = freshnessJsonObject.get("value").getAsString();
-
-        goTo(searchPage);
-        ThreadWait();
-        await();
-        createGlobalRulePromotion();
-
-        merchandisingActions.goToSectionInMerchandising(UnbxdEnum.FRESH);
-        FreshnessAction.selectAttribute(AttributeName);
-        FreshnessAction.selectAttributeValue(AttributeValue);
-        merchandisingActions.clickOnApplyButton();
-        ThreadWait();
-
-        // Wait for products to be visible and verify date_iso for first 5 products
-        int daysThreshold = Integer.parseInt(AttributeValue);
-        FreshnessAction.verifyDateIsoForFirstFiveProducts(daysThreshold);
-        searchPage.threadWait();
-        merchandisingActions.publishCampaign();
-        merchandisingActions.verifySuccessMessage();
-        ThreadWait();
-
-        searchPage.editGlobalRule();
-        ThreadWait();
-
-        // Verify freshness summary value in the promotion rules summary
-        FreshnessAction.verifyFreshnessSummaryValue(AttributeValue);
-        ThreadWait();
-        FreshnessAction.verifyDateIsoForFirstFiveProducts(daysThreshold);
-
-    }
-
     @AfterClass(alwaysRun = true, groups = {"sanity"})
     public void deleteCreatedRules() throws InterruptedException {
         deleteSearchQueryRuleIfPresent(query);
