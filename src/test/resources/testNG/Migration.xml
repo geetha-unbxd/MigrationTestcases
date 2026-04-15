@@ -1,5 +1,5 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="Migration" parallel="tests" thread-count="31" verbose="10" preserve-order="true">
+<suite name="Migration" parallel="tests" thread-count="37" verbose="10" preserve-order="true">
 
     <!-- ABTest -->
     <test name="Migration - ABTest - abCreateAndPreviewTest">
@@ -287,6 +287,62 @@
             <class name="UnbxdTests.testNG.consoleui.freshnessTest.searchFreshness">
                 <methods>
                     <include name="searchFreshnessCreateEditDeleteTest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- Collections -->
+    <test name="Migration - CollectionsuplodFileBrowse - uploadFileToCollections">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.Collections.CollectionsuplodFileBrowse">
+                <methods>
+                    <include name="uploadFileToCollections"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="Migration - CollectionsuploadFileSearch - uploadFileToCollections">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.Collections.CollectionsuploadFileSearch">
+                <methods>
+                    <include name="uploadFileToCollections"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="Migration - donwloadSampleCollectionsBrowse - downloadSampleCollectionsFile">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.Collections.donwloadSampleCollectionsBrowse">
+                <methods>
+                    <include name="downloadSampleCollectionsFile"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="Migration - downloadSampleCollectionsSearch - downloadSampleCollectionsFile">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.Collections.downloadSampleCollectionsSearch">
+                <methods>
+                    <include name="downloadSampleCollectionsFile"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="Migration - CollectionsTestBrowse - testBrowseAndDownloadCollectionFile">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.Collections.CollectionsTestBrowse">
+                <methods>
+                    <include name="testBrowseAndDownloadCollectionFile"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="Migration - CollectionsTestSearch - testCollectionsNavigationAndDownload">
+        <classes>
+            <class name="UnbxdTests.testNG.consoleui.Collections.CollectionsTestSearch">
+                <methods>
+                    <include name="testCollectionsNavigationAndDownload"/>
                 </methods>
             </class>
         </classes>

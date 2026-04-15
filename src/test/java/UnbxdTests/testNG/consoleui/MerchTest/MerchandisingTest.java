@@ -535,11 +535,17 @@ public class MerchandisingTest extends BaseTest {
     }
 
     @AfterClass
-    public void tearDown()
-    {
-        driver.close();
-        driver.quit();
-        Helper.tearDown();
+    public void tearDown() {
+        try {
+            if (driver != null) {
+                driver.quit();
+            }
+        } catch (Exception e) {
+            System.err.println("tearDown: session already gone or quit failed: " + e.getMessage());
+        } finally {
+            driver = null;
+            Helper.tearDown();
+        }
     }
 
     @AfterSuite(alwaysRun = true)
